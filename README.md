@@ -37,3 +37,38 @@ Hierfür benötigen wir einen Konvertierer von Word zu HTML/JSON (und ggf. ein P
 - Utf8? Ja. 
 - Wie automatisiert hochladen?
 - Wie sind Bücher/Kapitel in JSON-files unterteilt?
+
+
+## Weitere Details
+
+### HTML
+Aktuell verwendete ad-hoc HTML-Konvertierung:
+- CONVERT with Word365-HTML internal converter (vorher alle Kommentare entfernen)
+- REPLACE (http://www.hexmonkeysoftware.com/):
+  - ```<p class=BibleText> —> <p style="font-weight: bold; color:#004161;">```
+- CLEAN (https://html-cleaner.com/) with settings:
+  - Remove classes and IDs 
+  - Remove successive &nbps;s 
+  - Remove empty tags 
+  - Remove tags with one &nbps; 
+  - Remove span tags 
+  - Remove links 
+  - Encode special characters
+  
+- REPLACE, um EnduringWord-Formatierung (e.g., color #004161) zu übernehmen:
+  - ```<div> —> <div style="margin:30px;">``` (margin)
+  - ```<strong> —> <b style='color:#004161;’>``` (blue color)
+  - ```</strong> —> </b>```
+  - ```margin-left —> padding-left``` (paddings)
+  - ```.5in —>  30px```
+  - ```1.0in —>  60px```
+  - ```1.0in —>  60px```
+  - ```style="padding-left: 60px; text-indent: -.25in;  —>  style="padding-left: 75px;``` (bullets)
+  - ```style="padding-left: 90px; text-indent: -.25in;  —>  style="padding-left: 75px;```
+  - ```Remove style="vertical-align: middle;"```
+  - ```Remove punctuation-wrap: hanging;```
+  - ```Remove text-autospace: none;```
+  - ```&hellip;  —>  ...```
+
+### JSON
+Aktuell benutzen wir die Konvertierung von HTML in Markdown, um dann manuell JSON files zu erstellen.
