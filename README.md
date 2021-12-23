@@ -24,7 +24,7 @@ Hierfür benötigen wir einen Konvertierer von Word zu HTML/JSON (und ggf. ein P
 #### Qs:
 - Extend https://pydocx.readthedocs.io/?
 - Langfristige Lösung für mehrere Sprachen?
-- Plug-in für Wordpress? 
+- Plug-in für Wordpress (bspw. [mammoth docx converter](https://de.wordpress.org/plugins/mammoth-docx-converter/)? 
 - Automatisiertes Hochladen?
 - Wie kommen die Inhalte von der Website in die App?
 - Autor Rolle (WordPress-Benutzer ohne administrativen Rechte, nur Inhalte ausgewählter Seiten bearbeiten)?
