@@ -1,0 +1,41 @@
+{
+  "resources": [
+    {
+      "name": "Resource Reference Schema",
+      "locale": "de",
+      "abbreviation": "RRS",
+      "provider": "dictionary",
+      "cacheable": true,
+      "publisher": "ERF Medien",
+      "logo": "https:\/\/www.erf.de\/download\/logo\/L_ERF_Basis.jpg",
+      "copyright": "\u00a9 ERF Medien",
+      "api": null,
+      "public_url": false,
+      "items": [
+        {
+          "chapter_canonical": 4201000,
+          "canonicals": [
+            4201001,
+          ],
+          "title": "Matthäus stellt sein Thema im ersten Vers vor: Jesus als die Erfüllung der Prophetie und Erwartung Israels.",
+          "content": "[Here comes the markdown content.]"
+        },
+        {
+          "chapter_canonical": 4201000,
+          "canonicals": [
+            4201002,
+            4201003,
+            4201004,
+            4201005,
+            4201006,
+            4201007,
+            4201008
+          ],
+          "title": "Jesu Genealogie durch Joseph.",
+          "content": "[Here comes the markdown content.]"
+        },
+      ]
+    }
+  ],
+  "amp": false
+}

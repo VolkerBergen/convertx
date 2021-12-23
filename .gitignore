@@ -1,0 +1,20 @@
+# Caches
+__pycache__/
+.pytest_cache/
+.DS_Store
+*~
+.ipynb_checkpoints/
+.terraform
+
+# IDEs
+/.idea/
+
+# packaging
+/dist/
+/build/
+
+# docs
+/docs/
+
+# data
+/data/
