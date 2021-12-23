@@ -1,7 +1,7 @@
 # Word-to-HTML/JSON (for EnduringWord commentary) 
 
 Vielen Dank für Deine wertvolle Unterstützung! 
-Ziel des IT-Projekts ist es unsere Arbeit der deutschen Übersetzung (https://bibel-kommentar.de) von [Enduring Word](https://enduringword.com/) publizierbar zu machen. 
+Ziel des IT-Projekts ist es unsere Arbeit der deutschen Übersetzung ([ICF-Projekt](https://bibel-kommentar.de)) von [Enduring Word](https://enduringword.com/) publizierbar zu machen. 
 Hierfür benötigen wir einen Konvertierer von Word zu HTML/JSON (und ggf. ein Plugin für WordPress). 
 
 #### Wichtige Ressourcen:
@@ -22,6 +22,7 @@ Hierfür benötigen wir einen Konvertierer von Word zu HTML/JSON (und ggf. ein P
 - Kontakt: Andrea Kölsch
 
 #### Qs:
+- Extend https://pydocx.readthedocs.io/?
 - Langfristige Lösung für mehrere Sprachen?
 - Plug-in für Wordpress? 
 - Automatisiertes Hochladen?
@@ -44,9 +45,9 @@ Hierfür benötigen wir einen Konvertierer von Word zu HTML/JSON (und ggf. ein P
 ### HTML
 Aktuell verwendete ad-hoc HTML-Konvertierung:
 - CONVERT with Word365-HTML internal converter (vorher alle Kommentare entfernen)
-- REPLACE (http://www.hexmonkeysoftware.com/):
+- REPLACE ([MassReplaceIt](http://www.hexmonkeysoftware.com/)):
   - ```<p class=BibleText> —> <p style="font-weight: bold; color:#004161;">```
-- CLEAN (https://html-cleaner.com/) with settings:
+- CLEAN ([html-cleaner](https://html-cleaner.com/)) with settings:
   - Remove classes and IDs 
   - Remove successive &nbps;s 
   - Remove empty tags 
