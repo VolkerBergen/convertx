@@ -1,8 +1,7 @@
 # Word-to-HTML/JSON (for EnduringWord commentary) 
 
-Vielen Dank für Deine wertvolle Unterstützung! 
-Ziel des IT-Projekts ist es unsere Arbeit der deutschen Übersetzung ([ICF-Projekt](https://bibel-kommentar.de)) von [Enduring Word](https://enduringword.com/) publizierbar zu machen. 
-Hierfür benötigen wir einen Konvertierer von Word zu HTML/JSON (und ggf. ein Plugin für WordPress). 
+Ziel des Projekts ist es unsere deutsche Übersetzung ([ICF-Projekt](https://bibel-kommentar.de)) von [Enduring Word](https://enduringword.com/) von Word zu HTML/JSON zu konvertieren, um sie auf EnduringWord und Bibleserver zu publizieren. 
+Hierfür benötigen wir einen Konvertierer (und ggf. ein Plugin für WordPress). 
 
 #### Wichtige Ressourcen:
 - (Input) Word-Dateien im [OneDrive](https://bibel-kommentar.de/onedrive).
@@ -20,14 +19,11 @@ Hierfür benötigen wir einen Konvertierer von Word zu HTML/JSON (und ggf. ein P
 ### Enduring Word
 - WordPress / HTML (Format siehe [/examples](https://github.com/VolkerBergen/bible_commentary/tree/main/examples).)
 - Kontakt: Andrea Kölsch
+- ***Aktueller Stand: `convertx` - erster Prototyp. ***
 
 #### Qs:
-- Extend https://pydocx.readthedocs.io/?
-- Langfristige Lösung für mehrere Sprachen?
-- Plug-in für Wordpress (bspw. [mammoth docx converter](https://de.wordpress.org/plugins/mammoth-docx-converter/)? 
-- Automatisiertes Hochladen?
-- Wie kommen die Inhalte von der Website in die App?
-- Autor Rolle (WordPress-Benutzer ohne administrativen Rechte, nur Inhalte ausgewählter Seiten bearbeiten)?
+- Plug-in für Wordpress (bspw. [mammoth](https://de.wordpress.org/plugins/mammoth-docx-converter/))? 
+- Wie automatisiert hochladen?
 
 
 ### Bibleserver
@@ -40,36 +36,18 @@ Hierfür benötigen wir einen Konvertierer von Word zu HTML/JSON (und ggf. ein P
 - Wie sind Bücher/Kapitel in JSON-files unterteilt?
 
 
-## Weitere Details
+## ConvertX
 
-### HTML
-Aktuell verwendete ad-hoc HTML-Konvertierung:
-- CONVERT with Word365-HTML internal converter (vorher alle Kommentare entfernen)
-- REPLACE ([MassReplaceIt](http://www.hexmonkeysoftware.com/)):
-  - ```<p class=BibleText> —> <p style="font-weight: bold; color:#004161;">```
-- CLEAN ([html-cleaner](https://html-cleaner.com/)) with settings:
-  - Remove classes and IDs 
-  - Remove successive &nbps;s 
-  - Remove empty tags 
-  - Remove tags with one &nbps; 
-  - Remove span tags 
-  - Remove links 
-  - Encode special characters
-  
-- REPLACE, um EnduringWord-Formatierung (e.g., color #004161) zu übernehmen:
-  - ```<div> —> <div style="margin:30px;">``` (margin)
-  - ```<strong> —> <b style='color:#004161;’>``` (blue color)
-  - ```</strong> —> </b>```
-  - ```margin-left —> padding-left``` (paddings)
-  - ```.5in —>  30px```
-  - ```1.0in —>  60px```
-  - ```1.0in —>  60px```
-  - ```style="padding-left: 60px; text-indent: -.25in;  —>  style="padding-left: 75px;``` (bullets)
-  - ```style="padding-left: 90px; text-indent: -.25in;  —>  style="padding-left: 75px;```
-  - ```Remove style="vertical-align: middle;"```
-  - ```Remove punctuation-wrap: hanging;```
-  - ```Remove text-autospace: none;```
-  - ```&hellip;  —>  ...```
+Konvertierung von Docx zu HTML (in Python using [mammoth](https://github.com/mwilliamson/python-mammoth) und regexp).
 
-### JSON
-Aktuell benutzen wir die Konvertierung von HTML in Markdown, um dann manuell JSON files zu erstellen.
+Installation: `pip install git+https://github.com/VolkerBergen/bible_commentary`
+
+CLI: `convertx document.docx output.html`
+
+CLI entire directory: 
+
+```angular2html
+find . -name '*docx*' -print0 | while IFS= read -r -d '' filename; do
+  convertx "$filename" "${filename//docx/html}"
+done
+```
