@@ -40,7 +40,7 @@ Hierfür benötigen wir einen Konvertierer (und ggf. ein Plugin für WordPress).
 
 Konvertierung von Docx zu HTML (in Python using [mammoth](https://github.com/mwilliamson/python-mammoth) und regexp).
 
-Installation: `pip install git+https://github.com/VolkerBergen/bible_commentary`
+Installation: `pip install git+https://github.com/VolkerBergen/convertx`
 
 CLI: `convertx document.docx output.html`
 
