@@ -8,6 +8,7 @@ def style_mappings(text):
     text = standardize(text)
     text = regexp_style_mappings(text)
     text = align_styles(text)
+    text = add_copyright(text)
     return text
 
 
@@ -54,7 +55,7 @@ def regexp_style_mappings(text):
 
         text = re.sub(r'(<h4>)(.*)(</h4>)([\r\n]+)(<p>)(.*)(</p>)', fr'\1\2\3\4<p style="font-weight: bold; color:{COLOR};"> \6\7', text)
 
-        text = re.sub(r'(<p>)(<b>)?([a-h])(\.)', fr'<p style="padding-left: {PADDINGS[0]};">\2\3\4', text)
+        text = re.sub(r'(<p>)(<b>)?([a-hj-n])(\.)', fr'<p style="padding-left: {PADDINGS[0]};">\2\3\4', text)
         text = re.sub(r'(<p>)(<b>)?([iv]+)(\.)', fr'<p style="padding-left: {PADDINGS[1]};">\2\3\4', text)
 
         text = re.sub(r'<p>&middot; (.*)</p>', fr'<p style="margin-top:-10; padding-left: {PADDINGS[2]};">&bull; \1</p>', text)
@@ -93,5 +94,10 @@ def align_styles(text):
     for _ in range(20):
         for pad in PADDINGS:
             text = re.sub(fr'(<p style="padding-left: {pad};">)(.*)(</p>\n)(<p>)([^\d])', r'\1\2\3\1\5', text)
-        text = re.sub(fr'(<p style="font-weight: bold; color:{COLOR};">)(.*)(</p>\n)(<p>)([^\d])', r'\1\2\3\1\5', text)
+        text = re.sub(fr'(<p style="font-weight: bold; color:{COLOR};">)(.*)(</p>\n)(<p>)([^\d])', fr'\1\2\3<p style="margin-top:-10; font-weight: bold; color:{COLOR};">\5', text)
+        text = re.sub(fr'(<p style="margin-top:-10; font-weight: bold; color:{COLOR};">)(.*)(</p>\n)(<p>)([^\d])', r'\1\2\3\1\5', text)
+
     return text
+
+def add_copyright(text):
+    return str(text) + '\n<p><br /><em>&copy; 2022 The <a href="https://enduringword.com/">Enduring Word</a> Bible Commentary by David Guzik.</em></p>'
