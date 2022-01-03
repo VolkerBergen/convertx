@@ -41,6 +41,7 @@ def standardize(text):
         text = text.replace('</ul></li>', '')
 
         text = text.replace('  ', ' ')
+        text = text.replace('­', '')
     return text
 
 
@@ -117,7 +118,6 @@ def format_quotation_marks(text):
     text = re.sub(fr'(&bdquo;)({single_term})(&bdquo;|&ldquo;)', r'&sbquo;\2&lsquo;', text)
     text = re.sub(fr'(&bdquo;)(<b>)({single_term})(</b>)(&bdquo;|&ldquo;)', r'&sbquo;\2\3\4&lsquo;', text)
     text = re.sub(fr'(&bdquo;)(<em>)({single_term})(</em>)(&bdquo;|&ldquo;)', r'&sbquo;\2\3\4&lsquo;', text)
-
     return text
 
 
