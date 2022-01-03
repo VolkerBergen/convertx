@@ -18,24 +18,26 @@ def main():
         with open(args.style_map) as style_map_fileobj:
             style_map = style_map_fileobj.read()
 
-    with open(args.path, "rb") as docx_fileobj:
-        if args.output_dir is None:
-            convert_image = None
-            output_path = args.output
-        else:
-            convert_image = mammoth.images.img_element(ImageWriter(args.output_dir))
-            output_filename = "{0}.html".format(os.path.basename(args.path).rpartition(".")[0])
-            output_path = os.path.join(args.output_dir, output_filename)
-        
-        result = mammoth.convert(
-            docx_fileobj,
-            style_map=style_map,
-            convert_image=convert_image,
-            output_format=args.output_format,
-        )
-        result.value = style_mappings(result.value)
-        
-        _write_output(output_path, result.value)
+    if not '~$' in args.path:
+        with open(args.path, "rb") as docx_fileobj:
+            if args.output_dir is None:
+                convert_image = None
+                output_path = args.output
+            else:
+                convert_image = mammoth.images.img_element(ImageWriter(args.output_dir))
+                output_filename = "{0}.html".format(os.path.basename(args.path).rpartition(".")[0])
+                output_path = os.path.join(args.output_dir, output_filename)
+
+            result = mammoth.convert(
+                docx_fileobj,
+                style_map=style_map,
+                convert_image=convert_image,
+                output_format=args.output_format,
+            )
+            if args.output.endswith('html'):
+                result.value = style_mappings(result.value)
+
+            _write_output(output_path, result.value)
 
 
 class ImageWriter(object):

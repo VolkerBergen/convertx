@@ -11,6 +11,7 @@ def style_mappings(text):
     text = add_header(text)
     text = add_copyright(text)
     text = reformat_lists(text)
+    assertion_test(text)
     return text
 
 
@@ -125,30 +126,28 @@ def reformat_lists(text):
     text = re.sub(r'([\r\n]   <li>)(.*)(</li>[\r\n])(     <li>)', r'\1\2\3    <ol class="bull">\n\4', text)
 
     for _ in range(2):
-        text = re.sub(r'([\r\n]\s)(<li>)(.*)(</li>[\r\n])(<h)', r'\1\2\3\4</ol>\n\5', text)
-        text = re.sub(r'([\r\n]\s)(<li>)(.*)(</li>[\r\n])(<p)', r'\1\2\3\4</ol>\n\5', text)
+        text = re.sub(r'([\r\n]\s)(<li>)(.*)(</li>[\r\n])(<h|<p)', r'\1\2\3\4</ol>\n\5', text)
         text = re.sub(r'([\r\n]\s)(\s[\s]+)(<li>)(.*)(</li>[\r\n])([\s]?<)', r'\1\2\3\4\5\2</ol>\n\6', text)
         text = re.sub(r'([\r\n]\s\s\s\s\s)(<li>)(.*)(</li>[\r\n])(\s[\s]?[\s]?<)', r'\1\2\3\4    </ol>\n\5', text)
 
-        text = re.sub(r'([\r\n]\s\s\s\s)(</ol>)(.*)([\r\n])([\s]?<)', r'\1\2\3\4  </ol>\n\5', text)
-        text = re.sub(r'([\r\n]\s\s\s\s)(</ol>)(.*)([\r\n])(\s\s<ol)', r'\1\2\3\4  </ol>\n\5', text)
-        text = re.sub(r'([\r\n]\s\s)(</ol>)(.*)([\r\n])(<h)', r'\1\2\3\4</ol>\n\5', text)
-        text = re.sub(r'([\r\n]\s\s)(</ol>)(.*)([\r\n])(<p)', r'\1\2\3\4</ol>\n\5', text)
+        text = re.sub(r'([\r\n]\s\s\s\s)(</ol>)(.*)([\r\n])([\s]?<|\s\s<ol)', r'\1\2\3\4  </ol>\n\5', text)
+        text = re.sub(r'([\r\n]\s\s)(</ol>)(.*)([\r\n])(<h|<p)', r'\1\2\3\4</ol>\n\5', text)
     return text
 
 
 def add_header(text):
     header = '<head>\n <style type="text/css">\n'
-    header += '  body {background-color: #fcfaf0; margin: 30px;}\n'
-    header += '  br {display: block; margin-top: 2px; content: " ";}\n'
-    header += '  ol,ul {display: grid; gap: 5px; padding-left: 25px;}\n'
+    header += '  body {\n' \
+              '      background-color: #fcfaf0;\n' \
+              '      margin: 30px; margin-left: 4%; margin-right: 4%;\n' \
+              '     }\n'
+    header += '  br {display: grid; margin-top: 2px; content: " ";}\n'
+    header += '  ol {display: grid; list-style: lower-latin; gap: 10px; padding-left: 25px;}\n'
+    header += '  ol.i {list-style: lower-roman; gap: 8px;}\n'
+    header += '  ol.bull {list-style: square; gap: 5px;}\n'
     header += '  li {position: relative; padding-left: 2px;}\n'
-    header += '  ol {list-style: lower-latin;}\n'
-    header += '  ol.i {list-style: lower-roman;}\n'
-    header += '  ol.bull {list-style: square;}\n'
-    header += '  ul {list-style: square;}\n'
+    header += '  p.verse {font-weight: bold; color:#004161;}\n'
     header += '  b {color: #004161;}\n'
-    header += '  p.verse {font-weight: bold; color:#004161;}'
     header += ' </style>\n</head>\n<body>\n'
     text = header + str(text)
 
@@ -162,3 +161,26 @@ def add_copyright(text):
     copyright += 'Bible Commentary by David Guzik.</em></p>\n<body>'
     text = re.sub(r'([\n\r])([\n\r])', r'\1', text + copyright)
     return text
+
+
+def assertion_test(text):
+    for item in ['h2', 'h3', 'h4', 'p', 'ol', 'li']:
+        assert text.count(f'<{item}') == text.count(f'</{item}')
+
+
+def spell_check(text):
+    from spellchecker import SpellChecker
+
+    text_raw = re.sub(r'<head>.*?</head>', r' ', text)
+    text_raw = re.sub(r'<.*?>|\(.*?\)', r' ', text_raw)
+    text_raw = re.sub(r'&bdquo;|&ldquo;|&copy;', r' ', text_raw)
+    text_raw = re.sub(r'[ ]?[iv]+\.', r' ', text_raw)
+    text_raw = re.sub(r',|\.|\?|\!|\;|\:|\(|\)', r'', text_raw)
+    text_raw = re.sub(r'  |   ', r' ', text_raw)
+
+    spell = SpellChecker(language='de', distance=1)
+    misspelled = spell.unknown(text_raw.split(' '))
+    for word in misspelled:
+        word_corrected = spell.correction(word)
+        if word != word_corrected:
+            print(word, spell.correction(word))
