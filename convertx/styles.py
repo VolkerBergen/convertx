@@ -7,6 +7,7 @@ COLOR = '#004161'
 def style_mappings(text):
     text = standardize(text)
     text = regexp_style_mappings(text)
+    text = format_quotation_marks(text)
     text = align_styles(text)
     text = add_header(text)
     text = add_copyright(text)
@@ -89,24 +90,40 @@ def regexp_style_mappings(text):
         text = re.sub(r'\n(\w|\&)', r' \1', text)
         text = re.sub(r'([^\s])(\()', r'\1 \2', text)
 
-        text = re.sub(r'„', r'&bdquo;', text)
-        text = re.sub(r'“ ', r'&ldquo; ', text)
-        text = re.sub(r' “([^\s])', r' &bdquo;\1', text)
-        text = re.sub(r'([^\s])“', r'\1&ldquo;', text)
+    return text
 
-        text = re.sub(r' &quot;([^\s])', r' &bdquo;\1', text)
-        text = re.sub(r'>&quot;([^\s])', r'>&bdquo;\1', text)
-        text = re.sub(r'([^\s])&quot;', r'\1&ldquo;', text)
 
-        text = re.sub(r'(&ldquo;)([\w])', r'\1 \2', text)
-        text = re.sub(r'(&bdquo;)(\w+)(&bdquo;)', r'\1\2&ldquo;', text)
-        text = re.sub(r'(&bdquo;)(\w+)(&ldquo;)', r'&sbquo;\2&lsquo;', text)
+def format_quotation_marks(text):
+    text = re.sub(fr' \'(<em>)([^\']*)(</em>)\'', r' &sbquo;\1\2\3&lsquo;', text)
+    text = re.sub(fr' \'(<b>)([^\']*)(</b>)\'', r' &sbquo;\1\2\3&lsquo;', text)
+    text = re.sub(fr' \'([^\']*)\'', r' &sbquo;\1&lsquo;', text)
+
+    text = re.sub(r'(\s|\(|>)&quot;(<b>)([^&quot;]*)(</b>)&quot;', r'\1&bdquo;\2\3\4&ldquo;', text)
+    text = re.sub(r'(\s|\(|>)&quot;(<em>)([^&quot;]*)(</em>)&quot;', r'\1&bdquo;\2\3\4&ldquo;', text)
+    text = re.sub(r'(\s|\(|>)&quot;([^&quot;]*)&quot;', r'\1&bdquo;\2&ldquo;', text)
+
+    text = re.sub(r'„', r'&bdquo;', text)
+    text = re.sub(r' “([^\s])', r' &bdquo;\1', text)
+
+    text = re.sub(r'(“|”)([\s\:\.\;\,])', r'&ldquo;\2', text)
+    text = re.sub(r'([^\s])(</b>|</em>)?(“|”)', r'\1\2&ldquo;', text)
+
+    text = re.sub(r'(\s|\(|>)&quot;([^\s\:\.\;\,])', r'\1&bdquo;\2', text)
+    text = re.sub(r'([^\s])&quot;', r'\1&ldquo;', text)
+    text = re.sub(r'(&ldquo;)([\w])', r'\1 \2', text)
+    text = re.sub(r'(&bdquo;.*?)([^$ldquo;][\.]|[\.][^$ldquo;])( \(.*?\))', r'\1\2&ldquo;\3', text)
+
+    single_term = '\w+|[^\s]+\-[^\s]+|[^\s]+\s[^\s]+|[^\s]+\s[^\s]+\s[^\s]+'
+    text = re.sub(fr'(&bdquo;)({single_term})(&bdquo;|&ldquo;)', r'&sbquo;\2&lsquo;', text)
+    text = re.sub(fr'(&bdquo;)(<b>)({single_term})(</b>)(&bdquo;|&ldquo;)', r'&sbquo;\2\3\4&lsquo;', text)
+    text = re.sub(fr'(&bdquo;)(<em>)({single_term})(</em>)(&bdquo;|&ldquo;)', r'&sbquo;\2\3\4&lsquo;', text)
+
     return text
 
 
 def align_styles(text):
     # Style unformatted html lines by applying style from preceding line
-    for _ in range(20):
+    for _ in range(5):
         for pad in PADDINGS:
             text = re.sub(fr'(<p style="padding-left: {pad};">)(.*)(</p>\n)(<p>)([^\d])', r'\1\2<br />\5', text)
         text = re.sub(fr'(<p style="font-weight: bold; color:{COLOR};">)(.*)(</p>\n)(<p>)([^\d])', fr'\1\2<br />\5', text)
@@ -166,6 +183,7 @@ def add_copyright(text):
 def assertion_test(text):
     for item in ['h2', 'h3', 'h4', 'p', 'ol', 'li']:
         assert text.count(f'<{item}') == text.count(f'</{item}')
+    #print(text.count(f'&bdquo;'), text.count(f'&ldquo;'))
 
 
 def spell_check(text):

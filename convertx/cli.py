@@ -19,6 +19,7 @@ def main():
             style_map = style_map_fileobj.read()
 
     if not '~$' in args.path:
+        #print(args.path)
         with open(args.path, "rb") as docx_fileobj:
             if args.output_dir is None:
                 convert_image = None
