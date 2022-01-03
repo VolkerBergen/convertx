@@ -163,13 +163,16 @@ def add_header(text):
     header += '  ol.i {list-style: lower-roman; gap: 8px;}\n'
     header += '  ol.bull {list-style: square; gap: 5px;}\n'
     header += '  li {position: relative; padding-left: 2px;}\n'
-    header += '  p.verse {font-weight: bold; color:#004161;}\n'
+    header += '  p.verse {font-weight: bold; font-family: Georgia; color:#004161;}\n'
     header += '  b {color: #004161;}\n'
+    header += '  hr {margin: -2px;}\n'
     header += ' </style>\n</head>\n<body>\n'
     text = header + str(text)
 
     text = re.sub(r'<b style="color:#004161;">', r'<b>', text)
     text = re.sub(r'<p style="font-weight: bold; color:#004161;">', r'<p class="verse">', text)
+    text = re.sub(r'(<p class="verse">)(.*)(</p>)', r'<hr>\1\2\3<hr>', text)
+
     return text
 
 
