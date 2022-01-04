@@ -10,35 +10,48 @@ from .styles import style_mappings
 
 
 def main():
-    args = _parse_args()
-    
-    if args.style_map is None:
-        style_map = None
+    if len(sys.argv) == 1:
+        # loop through entire directory and search for docx files
+        command = 'for d in */ ; do\n'
+        command += '  find . -name "*docx*" -print0 | while IFS= read -r -d "" filename; do\n'
+        command += '  convertx "$filename" "${filename//docx/html}"\n'
+        command += '  done\n'
+        command += 'done'
+        os.system(command)
+    elif len(sys.argv) == 2:
+        filename_docx = sys.argv[-1]
+        filename_html = filename_docx.replace("docx", "html")
+        os.system(f'convertx {filename_docx} {filename_html}')
     else:
-        with open(args.style_map) as style_map_fileobj:
-            style_map = style_map_fileobj.read()
+        args = _parse_args()
 
-    if not '~$' in args.path:
-        with open(args.path, "rb") as docx_fileobj:
-            if args.output_dir is None:
-                convert_image = None
-                output_path = args.output
-            else:
-                convert_image = mammoth.images.img_element(ImageWriter(args.output_dir))
-                output_filename = "{0}.html".format(os.path.basename(args.path).rpartition(".")[0])
-                output_path = os.path.join(args.output_dir, output_filename)
+        if args.style_map is None:
+            style_map = None
+        else:
+            with open(args.style_map) as style_map_fileobj:
+                style_map = style_map_fileobj.read()
 
-            result = mammoth.convert(
-                docx_fileobj,
-                style_map=style_map,
-                convert_image=convert_image,
-                output_format=args.output_format,
-            )
-            if args.output.endswith('html'):
-                title = args.output.split('/')[-1].strip('.html')
-                result.value = style_mappings(result.value, title)
+        if not '~$' in args.path:
+            with open(args.path, "rb") as docx_fileobj:
+                if args.output_dir is None:
+                    convert_image = None
+                    output_path = args.output
+                else:
+                    convert_image = mammoth.images.img_element(ImageWriter(args.output_dir))
+                    output_filename = "{0}.html".format(os.path.basename(args.path).rpartition(".")[0])
+                    output_path = os.path.join(args.output_dir, output_filename)
 
-            _write_output(output_path, result.value)
+                result = mammoth.convert(
+                    docx_fileobj,
+                    style_map=style_map,
+                    convert_image=convert_image,
+                    output_format=args.output_format,
+                )
+                if args.output.endswith('html'):
+                    title = args.output.split('/')[-1].strip('.html')
+                    result.value = style_mappings(result.value, title)
+
+                _write_output(output_path, result.value)
 
 
 class ImageWriter(object):
