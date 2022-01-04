@@ -12,16 +12,13 @@ from .styles import style_mappings
 def main():
     if len(sys.argv) == 1:
         # loop through entire directory and search for docx files
-        command = 'for d in */ ; do\n'
-        command += '  find . -name "*docx*" -print0 | while IFS= read -r -d "" filename; do\n'
-        command += '  convertx "$filename" "${filename//docx/html}"\n'
-        command += '  done\n'
-        command += 'done'
+        command = 'find . -name "*docx*" -print0 | while IFS= read -r -d "" filename; do\n'
+        command += 'convertx "$filename" "${filename//docx/html}"\ndone'
         os.system(command)
     elif len(sys.argv) == 2:
         filename_docx = sys.argv[-1]
         filename_html = filename_docx.replace("docx", "html")
-        os.system(f'convertx {filename_docx} {filename_html}')
+        os.system(f'convertx \"{filename_docx}\" \"{filename_html}\"')
     else:
         args = _parse_args()
 
