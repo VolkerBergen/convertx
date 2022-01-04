@@ -20,11 +20,13 @@ Installation: `pip install git+https://github.com/VolkerBergen/convertx`
 
 CLI: `convertx document.docx output.html`
 
-CLI entire directory: 
+CLI entire directory incl. sub-directories: 
 
 ```
-find . -name '*docx*' -print0 | while IFS= read -r -d '' filename; do
+for d in */ ; do
+  find . -name '*docx*' -print0 | while IFS= read -r -d '' filename; do
   convertx "$filename" "${filename//docx/html}"
+  done
 done
 ```
 
