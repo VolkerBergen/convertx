@@ -19,7 +19,6 @@ def main():
             style_map = style_map_fileobj.read()
 
     if not '~$' in args.path:
-        #print(args.path)
         with open(args.path, "rb") as docx_fileobj:
             if args.output_dir is None:
                 convert_image = None
@@ -36,7 +35,8 @@ def main():
                 output_format=args.output_format,
             )
             if args.output.endswith('html'):
-                result.value = style_mappings(result.value)
+                title = args.output.split('/')[-1].strip('.html')
+                result.value = style_mappings(result.value, title)
 
             _write_output(output_path, result.value)
 

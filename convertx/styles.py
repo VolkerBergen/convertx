@@ -4,15 +4,16 @@ PADDINGS = ['30px', '60px', '80px']
 COLOR = '#004161'
 
 
-def style_mappings(text):
+def style_mappings(text, title=None):
     text = standardize(text)
     text = regexp_style_mappings(text)
     text = format_quotation_marks(text)
     text = align_styles(text)
     text = add_header(text)
     text = add_copyright(text)
+    text = format_bible_verses(text, title)
     text = reformat_lists(text)
-    assertion_test(text)
+    assertion_test(text, title)
     return text
 
 
@@ -55,8 +56,10 @@ def regexp_style_mappings(text):
         text = re.sub(r'(<p>)(<b>)?(<em>)?([A-Z]\.)(.*)(</b>)(</p>)', r'<h3>\4\5</h3>', text)
         text = re.sub(r'(<p>)(<b>)?(<em>)?([A-Z]\.)(.*)(</p>)', r'<h3>\4\5</h3>', text)
 
-        text = re.sub(r'(<p>)(<b>)([0-9])(\. )(\()([0-9])(.*)(</b>)(</p>)', r'<h4>\3\4\5Vers \6\7</h4>', text)
-        text = re.sub(r'(<p>)(<b>)?([0-9])(\. )(\()([0-9])(.*)(</b>)?(</p>)', r'<h4>\3\4\5Vers \6\7</h4>', text)
+        text = re.sub(r'(<p>)(<b>)([0-9])(\. )(\()(\d{1,3})(.*)(</b>)(</p>)', r'<h4>\3\4\5Vers \6\7</h4>', text)
+        text = re.sub(r'(<p>)(<b>)?([0-9])(\. )(\()(\d{1,3})(.*)(</p>)', r'<h4>\3\4\5Vers \6\7</h4>', text)
+        text = re.sub(r'(<h4>[0-9]\. )(\(Vers )(\d{1,3})( )(\w)', r'\1\2\3\5', text)
+        text = re.sub(r'(<h4>[0-9]\. )(\(Vers )(\d{1,3}\w?)(-\d{1,3}\w?)?(\). )', r'\1\2\3\4) ', text)
 
         text = re.sub(r'(<h2>)(.*)(<b><em>)(.*)(</em></b>)(.*)(</h2>)', r'\1\2\4\6\7', text)
         text = re.sub(r'(<h2>)(.*)(<b>|<strong>|<em>|</em>|</b>)(.*)(</h2>)', r'\1\2\4\5', text)
@@ -166,13 +169,12 @@ def add_header(text):
     header += '  p.verse {font-weight: bold; font-family: Georgia; color:#004161;}\n'
     header += '  b {color: #004161;}\n'
     header += '  hr {margin: -2px;}\n'
+    header += '  small {display: inline-block;}\n'
     header += ' </style>\n</head>\n<body>\n'
     text = header + str(text)
 
     text = re.sub(r'<b style="color:#004161;">', r'<b>', text)
     text = re.sub(r'<p style="font-weight: bold; color:#004161;">', r'<p class="verse">', text)
-    text = re.sub(r'(<p class="verse">)(.*)(</p>)', r'<hr>\1\2\3<hr>', text)
-
     return text
 
 
@@ -183,10 +185,25 @@ def add_copyright(text):
     return text
 
 
-def assertion_test(text):
+def format_bible_verses(text, title=None):
+    h4 = '(<h4>[0-9]\. )(\(Vers )(\d{1,3}\s?\w?)(\-\d{1,3}\s?\w?)?(\) )(.*</h4>[\r\n])'
+    h4_verse = fr'{h4}(<p class="verse"> )(.*)(</p>)'
+    if title[-1].isdigit():
+        text = re.sub(h4_verse, fr'\1\6<hr>\7&bdquo;\8&ldquo;  <small>({title},&thinsp;\3\4)</small>\9<hr>', text)
+    else:
+        text = re.sub(h4_verse, fr'\1\6<hr>\7&bdquo;\8&ldquo;  <small>({title} \3\4)</small>\9<hr>', text)
+    return text
+
+
+def assertion_test(text, title):
     for item in ['h2', 'h3', 'h4', 'p', 'ol', 'li']:
         assert text.count(f'<{item}') == text.count(f'</{item}')
-    #print(text.count(f'&bdquo;'), text.count(f'&ldquo;'))
+    assert text.count('(Vers ') == 0
+
+    b_count, l_count = text.count(f'&bdquo;'), text.count(f'&ldquo;')
+    if b_count != l_count:
+        title_eng = re.sub(r'[^a-zA-Z0-9\s]', r'', title)
+        print(title, ' '*(15-len(title_eng)), f'Unbalanced quotation marks: {b_count} <> {l_count}')
 
 
 def spell_check(text):
