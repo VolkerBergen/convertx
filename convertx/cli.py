@@ -10,15 +10,24 @@ from .styles import style_mappings, style_mappings_md
 
 
 def main():
+    command = 'find . -name "*docx*" -print0 | while IFS= read -r -d "" filename; do\n'
+    command += 'convertx "$filename" "${filename//docx/html}"\ndone'
+
+    # loop through directory for html conversion
     if len(sys.argv) == 1:
-        # loop through entire directory and search for docx files
-        command = 'find . -name "*docx*" -print0 | while IFS= read -r -d "" filename; do\n'
-        command += 'convertx "$filename" "${filename//docx/html}"\ndone'
         os.system(command)
+
+    # loop through directory for markdown conversion
+    elif (len(sys.argv) == 2) and (sys.argv[-1] == 'markdown'):
+        os.system(command.replace('html', 'md'))
+
+    # html conversion if only input file provided
     elif len(sys.argv) == 2:
         filename_docx = sys.argv[-1]
         filename_html = filename_docx.replace("docx", "html")
         os.system('convertx "{}" "{}"'.format(filename_docx, filename_html))
+
+    # actual html or markdown conversion
     else:
         args = _parse_args()
 
@@ -41,6 +50,7 @@ def main():
                     style_map=style_map,
                     output_format=args.output_format,
                 )
+
                 if args.output.endswith('html'):
                     title = args.output.split('/')[-1].strip('.html')
                     result.value = style_mappings(result.value, title)
@@ -49,9 +59,10 @@ def main():
                     title = args.output.split('/')[-1].strip('.md')
                     result.value = style_mappings(result.value, title)
 
-                    result_md = html2text(result.value)
-                    result_md = style_mappings_md(result_md)
-                    _write_output(output_path, result_md)
+                    result.value = html2text(result.value)
+                    result.value = style_mappings_md(result.value)
+
+                _write_output(output_path, result.value)
 
 
 def _write_output(path, contents):
