@@ -1,11 +1,11 @@
-from pathlib import Path
+import os
 from setuptools import find_packages, setup
 
 setup(
     name='convertx',
     version='0.0.1',
     description='Convert Word documents (docx) to clean HTML and Markdown',
-    long_description=Path("README.md").read_text("utf-8"),
+    long_description=open(os.path.join(os.path.dirname(__file__), 'README.md')).read(),
     author='Volker Bergen',
     author_email='email@volkerbergen.de',
     url='http://github.com/VolkerBergen/convertx',
