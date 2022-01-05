@@ -15,7 +15,7 @@ def style_mappings(text, title=None):
     text = add_header(text)
     text = add_copyright(text)
     text = format_bible_verses(text, title)
-    text = reformat_lists(text)
+    text = format_lists(text)
     assertion_test(text, text_raw, title)
     return text
 
@@ -34,6 +34,9 @@ def standardize(text):
         text = text.replace('<p> ', '<p>')
         text = text.replace('. </p>', '.</p>')
         text = text.replace('. </li>', '.</li>')
+
+        text = text.replace('<p><br />', '<p>')
+        text = text.replace('<br /></p>', '</p>')
 
         text = text.replace('<strong>', '<b>')
         text = text.replace('</strong>', '</b>')
@@ -94,16 +97,18 @@ def regexp_style_mappings(text):
         pad0 = fr'<p style="padding-left: {PADDINGS[0]};">'
         pad1 = fr'<p style="padding-left: {PADDINGS[1]};">'
 
-        text = re.sub(r'(<p>)(<b>)?([a-hj-n])(\.)', fr'{pad0}\2\3\4', text)
-        text = re.sub(r'(<p>)(<b>)?([a-hj-n])( )', fr'{pad0}\2\3.\4', text)
+        text = re.sub(r'(<p>)(<b>)?([a-hj-u])(\.)', fr'{pad0}\2\3\4', text)
+        text = re.sub(r'(<p>)(<b>)?([a-hj-u])( )', fr'{pad0}\2\3.\4', text)
+        text = re.sub(fr'({pad1}h\. )(.*)(</p>[\r\n])(<p>)(i\. <b>)', fr'\1\2\3{pad0}\5', text)
+        
         text = re.sub(r'(<p>)(<b>)?([iv]+)(\.)', fr'{pad1}\2\3\4', text)
         text = re.sub(r'(<p>)(<b>)?([iv]+)( )', fr'{pad1}\2\3.\4', text)
 
         # fix list item i. if it belongs to [a-n] hierarchy
-        text = re.sub(fr'({pad1}[iv]+\. )(.*)(</p>[\r\n])({pad1})(i\. )', fr'\1\2\3{pad0}\5', text)
+        text = re.sub(fr'({pad1}[iv]+\. )(.*)(</p>[\r\n])({pad1})(i\. <b>)', fr'\1\2\3{pad0}\5', text)
         #'(<p style="padding-left: 60px;">[iv]+)(.*)(</p>[\r\n])(<p style="padding-left: 60px;">)(i\. )'
         # fix -> replace ii. with i. if it comes right after [a-z]\.
-        text = re.sub(fr'({pad0}[a-hj-n]\. )(.*)(</p>\n{pad1})(ii. )', fr'\1\2\3i. ', text)
+        text = re.sub(fr'({pad0}[a-hj-u]\. )(.*)(</p>\n{pad1})(ii. )', fr'\1\2\3i. ', text)
 
         # unordered lists -> add paddings to &middot;
         pad2 = fr'<p style="margin-top:-10; padding-left: {PADDINGS[2]};">&bull;'
@@ -181,7 +186,7 @@ def align_styles(text):
     return text
 
 
-def reformat_lists(text):
+def format_lists(text):
     pad0 = fr'<p style="padding-left: {PADDINGS[0]};">'
     pad1 = fr'<p style="padding-left: {PADDINGS[1]};">'
     pad2 = fr'<p style="margin-top:-10; padding-left: {PADDINGS[2]};">&bull;'
