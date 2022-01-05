@@ -45,9 +45,11 @@ def main():
 
                 _write_output(output_path, result.value)
 
-                from markdownify import markdownify as md
+                if False:  # for building markdown converter
+                    from html2text import html2text
 
-                _write_output(output_path.replace('html', 'md'), md(result.value))
+                    result_md = html2text(result.value)
+                    _write_output(output_path.replace('html', 'md'), result_md)
 
 
 def _write_output(path, contents):
