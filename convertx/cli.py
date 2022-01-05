@@ -4,7 +4,9 @@ import os
 import sys
 
 from mammoth import convert, writers
-from .styles import style_mappings
+from html2text import html2text
+
+from .styles import style_mappings, style_mappings_md
 
 
 def main():
@@ -43,13 +45,13 @@ def main():
                     title = args.output.split('/')[-1].strip('.html')
                     result.value = style_mappings(result.value, title)
 
-                _write_output(output_path, result.value)
-
-                if False:  # for building markdown converter
-                    from html2text import html2text
+                elif args.output.endswith('md'):
+                    title = args.output.split('/')[-1].strip('.md')
+                    result.value = style_mappings(result.value, title)
 
                     result_md = html2text(result.value)
-                    _write_output(output_path.replace('html', 'md'), result_md)
+                    result_md = style_mappings_md(result_md)
+                    _write_output(output_path, result_md)
 
 
 def _write_output(path, contents):

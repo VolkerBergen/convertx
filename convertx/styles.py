@@ -7,6 +7,8 @@ PADDINGS = ['30px', '60px', '80px']
 COLOR = '#004161'
 
 
+"""HTML mappings"""
+
 def style_mappings(text, title=None):
     text_raw = copy(text)
 
@@ -309,3 +311,13 @@ def spell_check(text):
         word_corrected = spell.correction(word)
         if word != word_corrected:
             print(word, spell.correction(word))
+
+
+"""Markdown mappings"""
+
+def style_mappings_md(text):
+    text = re.sub(r'[\r\n](\w)', r'\1', text)
+    text = re.sub(r'([\r\n])  \d{1,3}\. (\*\*)', r'\1* \2', text)
+    text = re.sub(r'([\r\n])    \d{1,3}\.', r'\1   *', text)
+    text = re.sub(r'([\r\n])      \d{1,3}\.', r'\1      *', text)
+    return text
