@@ -1,11 +1,9 @@
 import argparse
 import io
 import os
-import shutil
 import sys
-import mammoth
-from mammoth import writers
 
+from mammoth import convert, writers
 from .styles import style_mappings
 
 
@@ -18,7 +16,7 @@ def main():
     elif len(sys.argv) == 2:
         filename_docx = sys.argv[-1]
         filename_html = filename_docx.replace("docx", "html")
-        os.system(f'convertx \"{filename_docx}\" \"{filename_html}\"')
+        os.system('convertx "{}" "{}"'.format(filename_docx, filename_html))
     else:
         args = _parse_args()
 
@@ -31,17 +29,14 @@ def main():
         if not '~$' in args.path:
             with open(args.path, "rb") as docx_fileobj:
                 if args.output_dir is None:
-                    convert_image = None
                     output_path = args.output
                 else:
-                    convert_image = mammoth.images.img_element(ImageWriter(args.output_dir))
                     output_filename = "{0}.html".format(os.path.basename(args.path).rpartition(".")[0])
                     output_path = os.path.join(args.output_dir, output_filename)
 
-                result = mammoth.convert(
+                result = convert(
                     docx_fileobj,
                     style_map=style_map,
-                    convert_image=convert_image,
                     output_format=args.output_format,
                 )
                 if args.output.endswith('html'):
@@ -50,22 +45,9 @@ def main():
 
                 _write_output(output_path, result.value)
 
+                from markdownify import markdownify as md
 
-class ImageWriter(object):
-    def __init__(self, output_dir):
-        self._output_dir = output_dir
-        self._image_number = 1
-        
-    def __call__(self, element):
-        extension = element.content_type.partition("/")[2]
-        image_filename = "{0}.{1}".format(self._image_number, extension)
-        with open(os.path.join(self._output_dir, image_filename), "wb") as image_dest:
-            with element.open() as image_source:
-                shutil.copyfileobj(image_source, image_dest)
-        
-        self._image_number += 1
-        
-        return {"src": image_filename}
+                _write_output(output_path.replace('html', 'md'), md(result.value))
 
 
 def _write_output(path, contents):
