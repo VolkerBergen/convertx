@@ -317,7 +317,13 @@ def spell_check(text):
 
 def style_mappings_md(text):
     text = re.sub(r'[\r\n](\w)', r'\1', text)
-    text = re.sub(r'([\r\n])  \d{1,3}\. (\*\*)', r'\1* \2', text)
-    text = re.sub(r'([\r\n])    \d{1,3}\.', r'\1   *', text)
-    text = re.sub(r'([\r\n])      \d{1,3}\.', r'\1      *', text)
+    text = re.sub(r'([\r\n])(\#\#\# [A-Z]\.)', r'\1\n\2', text)
+    text = re.sub(r'([\r\n])(\#\#\#\# \d{1,3})', r'\1\n\2', text)
+
+    text = re.sub(r'([\r\n])  \d{1,3}\. (\*\*)', r'\1\n\n\2', text)
+    text = re.sub(r'([\r\n])    \d{1,3}\.', r'\1*', text)
+    text = re.sub(r'([\r\n])      \d{1,3}\.', r'\1   *', text)
+    text = re.sub(r'([\r\n])([\r\n])', r'\1', text)
+
+    text = re.sub(r'(\* \* \*[\r\n]„)(.*)(")', r'\1**\2** \3', text)
     return text
