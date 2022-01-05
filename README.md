@@ -3,7 +3,7 @@
 We aim bto build a converter for our german translations (see [ICF project](https://bibel-kommentar.de)) of the [Enduring Word](https://enduringword.com/) commentary from Word to HTML/JSON, in order to publish it at EnduringWord and Bibleserver. 
 
 #### Important ressources:
-- (Input) Word-files at [OneDrive](https://bibel-kommentar.de/onedrive).
+- (Input) Word-files at OneDrive.
 - (Output) HTML/JSON at [/examples](https://github.com/VolkerBergen/bible_commentary/tree/main/examples). 
 
 #### Platforms:
