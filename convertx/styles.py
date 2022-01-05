@@ -177,7 +177,7 @@ def format_quotation_marks(text):
 
 def align_styles(text):
     # Style unformatted lines by applying style from preceding line
-    for _ in range(5):
+    for _ in range(20):
         for pad in PADDINGS:
             text = re.sub(fr'(<p style="padding-left: {pad};">)(.*)(</p>\n)(<p>)([^\d])', r'\1\2<br />\5', text)
             text = re.sub(fr'(<p style="margin-top:-10; padding-left: {pad};">)(.*)(</p>\n)(<p>)([^\d])', r'\1\2<br />\5', text)
