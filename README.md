@@ -14,14 +14,19 @@ We aim bto build a converter for our german translations (see [ICF project](http
 ## ConvertX
 
 Our Python implementation `convertx` converts Docx-to-HTML (and will be extended for markdown). 
-It makes use of [mammoth](https://github.com/mwilliamson/python-mammoth) and multiple regexp commands.
 
 Installation: `pip install git+https://github.com/VolkerBergen/convertx`
 
-CLI: `convertx document.docx output.html`
+CLI (single file)
+- `convertx document.docx output.html`
+- `convertx document.docx output.md`
 
-To loop through the entire directory, simply `cd` into a directory and run `convertx`.
+CLI (full directory)
+- `cd` into directory and run `convertx html`.
+- `cd` into directory and run `convertx markdown`.
 
+Additional arguments:
+- `convertx html --output-dir=output`
 
 ## Project Outline
 

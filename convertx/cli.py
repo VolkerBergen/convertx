@@ -22,8 +22,12 @@ def main():
     if len(argv) == 1:
         os.system(command)
 
+    # loop through directory for html conversion
+    elif (len(argv) == 2) and ('html' in argv[-1]):
+        os.system(command)
+
     # loop through directory for markdown conversion
-    elif (len(argv) == 2) and (argv[-1] == 'markdown'):
+    elif (len(argv) == 2) and ('markdown' in argv[-1]):
         os.system(command.replace('html', 'md'))
 
     # html conversion if only input file provided
@@ -42,8 +46,7 @@ def main():
                 if args.output_dir is None:
                     output_path = args.output
                 else:
-                    output_filename = "{0}.html".format(os.path.basename(args.path).rpartition(".")[0])
-                    output_path = os.path.join(args.output_dir, output_filename)
+                    output_path = os.path.join(args.output_dir, os.path.basename(args.output))
 
                 result = convert(docx_fileobj).value
 
