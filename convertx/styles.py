@@ -131,8 +131,9 @@ def regexp_style_mappings(text):
 
         text = re.sub(r'(<p>)(|<b>)([a-hj-u])(\.)', r'{}\2\3\4'.format(pad0), text)
         text = re.sub(r'(<p>)(|<b>)([a-hj-u])( )', r'{}\2\3.\4'.format(pad0), text)
-        text = re.sub(r'({}h\. )(.*)(</p>[\r\n])(<p>)(i\. <b>)'.format(pad1), r'\1\2\3{}\5'.format(pad0), text)
-        
+        text = re.sub(r'({}h\. )(.*)(</p>[\r\n])(<p>)(i\. <b>)'.format(pad0), r'\1\2\3{}\5'.format(pad0), text)
+        text = re.sub(r'({}h\. )(.*)(</p>[\r\n])({})(i\. )(.*)(</p>[\r\n])({})(i\. )(.*)(</p>[\r\n])({})(i\. )'.format(pad0, pad1, pad1, pad1), r'\1\2\3{}\5\6\7{}\9\10\11{}\13'.format(pad1, pad0, pad1), text)
+
         text = re.sub(r'(<p>)(|<b>)([iv]+)(\.)', r'{}\2\3\4'.format(pad1), text)
         text = re.sub(r'(<p>)(|<b>)([iv]+)( )', r'{}\2\3.\4'.format(pad1), text)
 
