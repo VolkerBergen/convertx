@@ -17,6 +17,8 @@ Our Python implementation `convertx` converts Docx-to-HTML (and will be extended
 
 Installation: `pip install git+https://github.com/VolkerBergen/convertx`
 
+For multi-language (en/de) support also `pip install pycld2`
+
 CLI (single file)
 - `convertx document.docx output.html`
 - `convertx document.docx output.md`
