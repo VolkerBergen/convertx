@@ -10,13 +10,19 @@ from .styles import style_mappings, style_mappings_md
 
 
 def main():
-    argv = [arg for arg in sys.argv if not arg.startswith('--')]
-
     command = 'find . -name "*docx*" -print0 | while IFS= read -r -d "" filename; do\n'
     command += 'convertx "$filename" "${filename//docx/html}"\ndone'
 
+    argv = [arg for arg in sys.argv if not arg.startswith('--')]
+    argv_dir = [arg for arg in sys.argv if arg.startswith('--')]
+
+    if len(argv_dir) > 0:
+        command = command.replace('\ndone', ' {}\ndone'.format(' '.join(argv_dir)))
+
     if '--output-dir' in sys.argv[-1]:
-        command = command.replace('\ndone', ' {}\ndone'.format(sys.argv[-1]))
+        path = sys.argv[-1].split('=')[-1]
+        if not os.path.exists(path):
+            os.makedirs(path)
 
     # loop through directory for html conversion
     if len(argv) == 1:
@@ -40,13 +46,17 @@ def main():
     else:
         args = _parse_args()
 
-        if not '~$' in args.path:
+        is_valid = (not '~$' in args.path)
+        is_selected = (args.input_dir is None) or (args.input_dir in args.path)
+
+        if is_valid and is_selected:
             with open(args.path, "rb") as docx_fileobj:
 
                 if args.output_dir is None:
                     output_path = args.output
                 else:
                     output_path = os.path.join(args.output_dir, os.path.basename(args.output))
+                output_path = output_path.replace(' ', '')
 
                 result = convert(docx_fileobj).value
 
@@ -81,6 +91,10 @@ def _parse_args():
         nargs="?",
         metavar="output-path",
         help="Output path for the generated document.")
+
+    parser.add_argument(
+        "--input-dir",
+        help="Input directory for generated HTML.")
 
     parser.add_argument(
         "--output-dir",
