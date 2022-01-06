@@ -45,6 +45,8 @@ def style_mappings(text, title=None):
 
     if lang == 'de':
         bible_check(text, title)
+
+    #text = format_ascii(text)  # Do we need this?
     return text
 
 
@@ -284,6 +286,17 @@ def format_bible_verses(text, title=None):
         else:
             text = re.sub(h4_verse, r'\1\7<hr>\8&bdquo;\9&ldquo;  <small>({} \3\4\5)</small>\10<hr>'.format(title), text)
     text = re.sub('(\d{1,3}),(\d{1,3})', r'\1,&thinsp;\2', text)
+    return text
+
+
+def format_ascii(text):
+    non_ascii = ['Ä', 'Ö', 'Ü', 'ä', 'ö', 'ü', 'ß', '–']
+    replace_with = ['&Auml;', '&Ouml;', '&Uuml;', '&auml;', '&ouml;', '&uuml;', '&szlig;', '&ndash;']
+    for x, y in zip(non_ascii, replace_with):
+        try:
+            text.replace(x, y)
+        except:
+            pass
     return text
 
 
