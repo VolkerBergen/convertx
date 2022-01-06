@@ -383,9 +383,10 @@ def bible_check(text, title):
         #if not valid:
         #    print(vers_num + '   ' + vers)
 
-    perc_covered = int(n / len(verses) * 100)
-    if perc_covered < 90:
-        print('{} {}% of verses covered by Schlachter'.format(title_with_space, perc_covered))
+    if len(verses) > 0:
+        perc_covered = int(n / len(verses) * 100)
+        if perc_covered < 90:
+            print('{} {}% of verses covered by Schlachter'.format(title_with_space, perc_covered))
 
     return bible
 

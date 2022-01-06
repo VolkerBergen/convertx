@@ -1,6 +1,6 @@
 # Word-to-HTML/JSON (for EnduringWord commentary) 
 
-We aim bto build a converter for our german translations (see [ICF project](https://bibel-kommentar.de)) of the [Enduring Word](https://enduringword.com/) commentary from Word to HTML/JSON, in order to publish it at EnduringWord and Bibleserver. 
+We aim to build a converter for our german translations (see [ICF project](https://bibel-kommentar.de)) of the [Enduring Word](https://enduringword.com/) commentary from Word to HTML/JSON, in order to publish it at EnduringWord and Bibleserver. 
 
 #### Important ressources:
 - (Input) Word-files at OneDrive.
