@@ -3,6 +3,11 @@
 import re
 from copy import copy
 
+try:
+    import pycld2
+except ImportError:
+    pycld2 = None
+
 PADDINGS = ['30px', '60px', '80px']
 COLOR = '#004161'
 
@@ -20,6 +25,7 @@ def style_mappings(text, title=None):
     text = add_copyright(text)
     text = format_bible_verses(text, title)
     text = format_lists(text)
+    text = format_language(text)
     assertion_test(text, text_raw, title)
     return text
 
@@ -263,6 +269,26 @@ def format_bible_verses(text, title=None):
     return text
 
 
+def detect_language(text):
+    if pycld2 is None:
+        return None
+    raw_text = re.sub(r'[^a-zA-Z0-9\s]', r'', text)
+    reliable, index, top_3_choices = pycld2.detect(raw_text, bestEffort=False)
+    if not reliable:
+        reliable, index, top_3_choices = pycld2.detect(raw_text, bestEffort=True)
+    return top_3_choices[0][1]
+
+
+def format_language(text):
+    if detect_language(text) == 'en':
+        text = text.replace('&ldquo;', '&rdquo;')
+        text = text.replace('&lsquo;', '&rsquo;')
+
+        text = text.replace('&bdquo;', '&ldquo;')
+        text = text.replace('&sbquo;', '&lsquo;')
+    return text
+
+
 def assertion_test(text, text_orig, title):
     title_with_space = title + ' ' * (15 - len(re.sub(r'[^a-zA-Z0-9\s]', r'', title)))
 
@@ -283,16 +309,6 @@ def assertion_test(text, text_orig, title):
         count_open, count_close = text.count('&bdquo;'), text.count('&ldquo;')
         if count_open != count_close:
             print('{} Unbalanced quotation marks: {} <> {}'.format(title_with_space, count_open, count_close))
-
-
-def detect_language(text):
-    import pycld2 as cld2
-
-    raw_text = re.sub(r'[^a-zA-Z0-9\s]', r'', text)
-    reliable, index, top_3_choices = cld2.detect(raw_text, bestEffort=False)
-    if not reliable:
-        reliable, index, top_3_choices = cld2.detect(raw_text, bestEffort=True)
-    return top_3_choices[0][1]
 
 
 def spell_check(text):
