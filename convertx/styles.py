@@ -131,8 +131,10 @@ def regexp_style_mappings(text):
 
         text = re.sub(r'(<p>)(|<b>)([a-hj-u])(\.)', r'{}\2\3\4'.format(pad0), text)
         text = re.sub(r'(<p>)(|<b>)([a-hj-u])( )', r'{}\2\3.\4'.format(pad0), text)
+        text = re.sub(r'({}h\. )(.*)(</p>[\r\n])(<p>)(i\. )(.*)(</p>[\r\n]<p>ii\.)'.format(pad0), r'\1\2\3{}\5\6\7'.format(pad1), text)
         text = re.sub(r'({}h\. )(.*)(</p>[\r\n])(<p>)(i\. <b>)'.format(pad0), r'\1\2\3{}\5'.format(pad0), text)
         text = re.sub(r'({}h\. )(.*)(</p>[\r\n])({})(i\. )(.*)(</p>[\r\n])({})(i\. )(.*)(</p>[\r\n])({})(i\. )'.format(pad0, pad1, pad1, pad1), r'\1\2\3{}\5\6\7{}\9\10\11{}\13'.format(pad1, pad0, pad1), text)
+        text = re.sub(r'({}[iv]+\. )(.*)(</p>[\r\n])({})(i\. )(.*)(</p>[\r\n])({})(i\. )(.*)(</p>[\r\n])({})(ii\. )'.format(pad1, pad1, pad1, pad1), r'\1\2\3{}\5\6\7\8\9\10\11\12\13'.format(pad0), text)
 
         text = re.sub(r'(<p>)(|<b>)([iv]+)(\.)', r'{}\2\3\4'.format(pad1), text)
         text = re.sub(r'(<p>)(|<b>)([iv]+)( )', r'{}\2\3.\4'.format(pad1), text)
@@ -243,7 +245,7 @@ def format_lists(text):
         text = re.sub(r'([\r\n]\s\s\s\s\s)(<li>)(.*)(</li>[\r\n])(\s[\s]?[\s]?<)', r'\1\2\3\4    </ol>\n\5', text)
 
         text = re.sub(r'([\r\n]\s\s\s\s)(</ol>)(.*)([\r\n])([\s]?<|\s\s<ol)', r'\1\2\3\4  </ol>\n\5', text)
-        text = re.sub(r'([\r\n]\s\s)(</ol>)(.*)([\r\n])(<h|<p)', r'\1\2\3\4</ol>\n\5', text)
+        text = re.sub(r'([\r\n]\s\s)(</ol>)(.*)([\r\n])(<h|<p|<t)', r'\1\2\3\4</ol>\n\5', text)
     return text
 
 
