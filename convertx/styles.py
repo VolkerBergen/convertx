@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+import os
 from copy import copy
 
 try:
@@ -10,6 +11,18 @@ except ImportError:
 
 PADDINGS = ['30px', '60px', '80px']
 COLOR = '#004161'
+
+
+"""Utilies"""
+
+def detect_language(text):
+    if pycld2 is None:
+        return None
+    raw_text = re.sub(r'[^a-zA-Z0-9\s]', r'', text)
+    reliable, index, top_3_choices = pycld2.detect(raw_text, bestEffort=False)
+    if not reliable:
+        reliable, index, top_3_choices = pycld2.detect(raw_text, bestEffort=True)
+    return top_3_choices[0][1]
 
 
 """HTML mappings"""
@@ -25,8 +38,13 @@ def style_mappings(text, title=None):
     text = add_copyright(text)
     text = format_bible_verses(text, title)
     text = format_lists(text)
-    text = format_language(text)
     assertion_test(text, text_raw, title)
+
+    lang = detect_language(text)
+    text = format_language(text, lang)
+
+    if lang == 'de':
+        bible_check(text, title)
     return text
 
 
@@ -269,18 +287,10 @@ def format_bible_verses(text, title=None):
     return text
 
 
-def detect_language(text):
-    if pycld2 is None:
-        return None
-    raw_text = re.sub(r'[^a-zA-Z0-9\s]', r'', text)
-    reliable, index, top_3_choices = pycld2.detect(raw_text, bestEffort=False)
-    if not reliable:
-        reliable, index, top_3_choices = pycld2.detect(raw_text, bestEffort=True)
-    return top_3_choices[0][1]
-
-
-def format_language(text):
-    if detect_language(text) == 'en':
+def format_language(text, lang=None):
+    if lang is None:
+        lang = detect_language(text)
+    if lang == 'en':
         text = text.replace('&ldquo;', '&rdquo;')
         text = text.replace('&lsquo;', '&rsquo;')
 
@@ -311,6 +321,64 @@ def assertion_test(text, text_orig, title):
             print('{} Unbalanced quotation marks: {} <> {}'.format(title_with_space, count_open, count_close))
 
 
+"""Markdown mappings"""
+
+def style_mappings_md(text):
+    text = re.sub(r'[\r\n](\w)', r'\1', text)
+    text = re.sub(r'([\r\n])(\#\#\# [A-Z]\.)', r'\1\n\2', text)
+    text = re.sub(r'([\r\n])(\#\#\#\# \d{1,3})', r'\1\n\2', text)
+
+    text = re.sub(r'([\r\n])  \d{1,3}\. (\*\*)', r'\1\n\n\2', text)
+    text = re.sub(r'([\r\n])    \d{1,3}\.', r'\1*', text)
+    text = re.sub(r'([\r\n])      \d{1,3}\.', r'\1   *', text)
+    text = re.sub(r'([\r\n])([\r\n])', r'\1', text)
+
+    text = re.sub(r'(\* \* \*[\r\n]„)(.*)(")', r'\1**\2** \3', text)
+    return text
+
+
+"""Compare text with Schlachter bible text"""
+
+def load_bible():
+    file = os.path.join(os.path.dirname(__file__), 'Schlachter.txt')
+    bible = open(file, 'rb').read().decode('ISO-8859-1')
+    bible = re.sub(r'[^a-zA-Z0-9\s]', r'', bible)
+    bible = re.sub(r'([\r\n])', r' ', bible)
+    bible = re.sub(r' \d{1,3} ', r' ', bible)
+    bible = re.sub(r'  ', r' ', bible)
+    return bible
+
+
+def bible_check(text, title):
+    title_with_space = title + ' ' * (15 - len(re.sub(r'[^a-zA-Z0-9\s]', r'', title)))
+
+    bible = load_bible().lower()
+    verses = re.findall(r'<hr><p class="verse"> &bdquo;(.*)&ldquo;  <small>', text.lower())
+    verse_nums = re.findall(r'<hr><p class="verse"> &bdquo;.*&ldquo;  <small>\((.*)\)</small>', text.lower())
+
+    n = 0
+    for vers, vers_num in zip(verses, verse_nums):
+        vers = copy(re.sub(r'<br />|<small>|<small>|&bdquo;|&ldquo;', r'', vers))
+        vers = re.sub(r'[^a-zA-Z0-9\s]', r'', vers)
+        vers = re.sub(r'[\r\n]', r' ', vers)
+        vers = re.sub(r' \d{1,3} ', r' ', vers)
+        vers = re.sub(r'  ', r' ', vers)
+        valid = (vers[:30] in bible) or (vers[-30:] in bible)
+        n += valid
+
+        # for debugging:
+        #if not valid:
+        #    print(vers_num + '   ' + vers)
+
+    perc_covered = int(n / len(verses) * 100)
+    if perc_covered < 90:
+        print('{} {}% of verses covered by Schlachter'.format(title_with_space, perc_covered))
+
+    return bible
+
+
+"""Spell Checker (currently not being used)"""
+
 def spell_check(text):
     from spellchecker import SpellChecker
 
@@ -327,19 +395,3 @@ def spell_check(text):
         word_corrected = spell.correction(word)
         if word != word_corrected:
             print(word, spell.correction(word))
-
-
-"""Markdown mappings"""
-
-def style_mappings_md(text):
-    text = re.sub(r'[\r\n](\w)', r'\1', text)
-    text = re.sub(r'([\r\n])(\#\#\# [A-Z]\.)', r'\1\n\2', text)
-    text = re.sub(r'([\r\n])(\#\#\#\# \d{1,3})', r'\1\n\2', text)
-
-    text = re.sub(r'([\r\n])  \d{1,3}\. (\*\*)', r'\1\n\n\2', text)
-    text = re.sub(r'([\r\n])    \d{1,3}\.', r'\1*', text)
-    text = re.sub(r'([\r\n])      \d{1,3}\.', r'\1   *', text)
-    text = re.sub(r'([\r\n])([\r\n])', r'\1', text)
-
-    text = re.sub(r'(\* \* \*[\r\n]„)(.*)(")', r'\1**\2** \3', text)
-    return text
