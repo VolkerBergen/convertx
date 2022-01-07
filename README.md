@@ -35,7 +35,7 @@ Additional arguments:
 ### Enduring Word
 - Point of contact: **Andrea Kölsch**
 - HTML converter `convertx` nearly done.
-- tbd: WordPress plugin (e.g. [mammoth](https://de.wordpress.org/plugins/mammoth-docx-converter/))
+- tbd: choose WordPress plugin ([wpeverest](https://wpeverest.com/wordpress-plugins/everest-forms/) or [mammoth](https://de.wordpress.org/plugins/mammoth-docx-converter/) or [seraphinite](https://www.pluginforthat.com/plugin/seraphinite-post-docx-source/))
 - tbd: Auto-upload of files to WordPress
 
 ### Bibleserver
