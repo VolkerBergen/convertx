@@ -405,7 +405,7 @@ def bible_check(text, title):
 
     if len(verses) > 0:
         perc_covered = int(n / len(verses) * 100)
-        if perc_covered < 90:
+        if perc_covered < 60:
             print('{} {}% of verses covered by Schlachter'.format(title_with_space, perc_covered))
 
     return bible
