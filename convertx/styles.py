@@ -81,10 +81,13 @@ def standardize(text):
         text = text.replace('</ul></li>', '')
 
         text = text.replace('  ', ' ')
+        text = text.replace('\t', '')
 
-        # not compatible with py27 due to non-ascii characters
-        #text = text.replace(' ', ' ')
-        #text = text.replace('­', '')
+        try:  # not compatible with py27 due to non-ascii characters
+            text = text.replace(' ', ' ')
+            text = text.replace('­', '')
+        except:
+            pass
     return text
 
 
@@ -105,7 +108,7 @@ def regexp_style_mappings(text):
 
         # header4 = starts with [0-9] item
         text = re.sub(r'(<p>)(<b>)(\d{1,3})(\. )(\()(\d{1,3})(.*)(</b>)(</p>)', r'<h4>\3\4\5Vers \6\7</h4>', text)
-        text = re.sub(r'(<p>)(|<b>)(\d{1,3})(\. )(\()(\d{1,3})(.*)(</p>)', r'<h4>\3\4\5Vers \6\7</h4>', text)
+        text = re.sub(r'(<p>)(|<b>|<em>)(\d{1,3})(\. )(\()(\d{1,3})(.*)(</p>)', r'<h4>\3\4\5Vers \6\7</h4>', text)
 
         # header4 -> add 'Vers'
         text = re.sub(r'(<h4>\d{1,3}\. )(\(Vers )(\d{1,3})( )(\w)', r'\1\2\3\5', text)
