@@ -147,13 +147,13 @@ def regexp_style_mappings(text):
         text = re.sub(r'({}h\. )(.*)(</p>[\r\n])(<p>)(i\. )(.*)(</p>[\r\n]<p>ii\.)'.format(pad0), r'\1\2\3{}\5\6\7'.format(pad1), text)
         text = re.sub(r'({}h\. )(.*)(</p>[\r\n])(<p>)(i\. <b>)'.format(pad0), r'\1\2\3{}\5'.format(pad0), text)
         text = re.sub(r'({}h\. )(.*)(</p>[\r\n])({})(i\. )(.*)(</p>[\r\n])({})(i\. )(.*)(</p>[\r\n])({})(i\. )'.format(pad0, pad1, pad1, pad1), r'\1\2\3{}\5\6\7{}\9\10\11{}\13'.format(pad1, pad0, pad1), text)
-        text = re.sub(r'({}[iv]+\. )(.*)(</p>[\r\n])({})(i\. )(.*)(</p>[\r\n])({})(i\. )(.*)(</p>[\r\n])({})(ii\. )'.format(pad1, pad1, pad1, pad1), r'\1\2\3{}\5\6\7\8\9\10\11\12\13'.format(pad0), text)
+        text = re.sub(r'({}[ivx]+\. )(.*)(</p>[\r\n])({})(i\. )(.*)(</p>[\r\n])({})(i\. )(.*)(</p>[\r\n])({})(ii\. )'.format(pad1, pad1, pad1, pad1), r'\1\2\3{}\5\6\7\8\9\10\11\12\13'.format(pad0), text)
 
-        text = re.sub(r'(<p>)(|<b>)([iv]+)(\.)', r'{}\2\3\4'.format(pad1), text)
-        text = re.sub(r'(<p>)(|<b>)([iv]+)( )', r'{}\2\3.\4'.format(pad1), text)
+        text = re.sub(r'(<p>)(|<b>)([ivx]+)(\.)', r'{}\2\3\4'.format(pad1), text)
+        text = re.sub(r'(<p>)(|<b>)([ivx]+)( )', r'{}\2\3.\4'.format(pad1), text)
 
         # fix list item i. if it belongs to [a-n] hierarchy
-        text = re.sub(r'({}[iv]+\. )(.*)(</p>[\r\n])({})(i\. <b>)'.format(pad1, pad1), r'\1\2\3{}\5'.format(pad0), text)
+        text = re.sub(r'({}[ivx]+\. )(.*)(</p>[\r\n])({})(i\. <b>)'.format(pad1, pad1), r'\1\2\3{}\5'.format(pad0), text)
 
         # fix -> replace ii. with i. if it comes right after [a-z]\.
         text = re.sub(r'({}[a-hj-u]\. )(.*)(</p>\n{})(ii. )'.format(pad0, pad1), r'\1\2\3i. ', text)
@@ -243,7 +243,7 @@ def format_lists(text):
     text = re.sub(r'({}a. )'.format(pad0), r'<ol>\n\1', text)
     text = re.sub(r'({}i. )'.format(pad1), r'  <ol class="i">\n\1', text)
     text = re.sub(r'({})([a-z])(\. )(.*)(</p>)'.format(pad0), r' <li>\4</li>', text)
-    text = re.sub(r'({})([iv]+)(\. )(.*)(</p>)'.format(pad1), r'   <li>\4</li>', text)
+    text = re.sub(r'({})([ivx]+)(\. )(.*)(</p>)'.format(pad1), r'   <li>\4</li>', text)
     text = re.sub(r'({} )(.*)(</p>)'.format(pad2), r'     <li>\2</li>', text)
 
     # move table up if part of list
@@ -419,7 +419,7 @@ def spell_check(text):
     text_raw = re.sub(r'<head>.*?</head>', r' ', text)
     text_raw = re.sub(r'<.*?>|\(.*?\)', r' ', text_raw)
     text_raw = re.sub(r'&bdquo;|&ldquo;|&copy;', r' ', text_raw)
-    text_raw = re.sub(r'[ ]?[iv]+\.', r' ', text_raw)
+    text_raw = re.sub(r'[ ]?[ivx]+\.', r' ', text_raw)
     text_raw = re.sub(r',|\.|\?|\!|\;|\:|\(|\)', r'', text_raw)
     text_raw = re.sub(r'  |   ', r' ', text_raw)
 
