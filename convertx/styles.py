@@ -60,6 +60,7 @@ def standardize(text):
         text = text.replace('</h3><', '</h3>\n<')
         text = text.replace('</p><', '</p>\n<')
         text = text.replace('</li><', '</li>\n<')
+        text = text.replace('</table><', '</table>\n<')
 
         text = text.replace('<p> ', '<p>')
         text = text.replace('. </p>', '.</p>')
@@ -127,6 +128,15 @@ def regexp_style_mappings(text):
         # bible verse -> bold colored, comes right after header4
         verse_style = '<p style="font-weight: bold; color:{};">'.format(COLOR)
         text = re.sub(r'(<h4>)(.*)(</h4>)([\r\n]+)(<p>)(.*)(</p>)', r'\1\2\3\4{} \6\7'.format(verse_style), text)
+
+        # try to handle word-specific <ol>
+        vals = ['v', 'iv', 'iii', 'ii', 'i']
+        for i in range(len(vals)-1):
+            text = re.sub(r'(<ol><li>)(.*)(</li>[\r\n]</ol>)(<p>)({}\.)'.format(vals[i]), r'<p>{}.\2</p>\n\4\5'.format(vals[i+1]), text)
+
+        vals = ['g', 'f', 'e', 'd', 'c', 'b', 'a']
+        for i in range(len(vals) - 1):
+            text = re.sub(r'(<ol><li>)(.*)(</li>[\r\n]</ol>)(<p>)({}\.)'.format(vals[i]), r'<p>{}.\2</p>\n\4\5'.format(vals[i + 1]), text)
 
         # ordered lists -> add paddings to [a-n], [iv]
         pad0 = r'<p style="padding-left: {};">'.format(PADDINGS[0])
@@ -235,6 +245,10 @@ def format_lists(text):
     text = re.sub(r'({})([a-z])(\. )(.*)(</p>)'.format(pad0), r' <li>\4</li>', text)
     text = re.sub(r'({})([iv]+)(\. )(.*)(</p>)'.format(pad1), r'   <li>\4</li>', text)
     text = re.sub(r'({} )(.*)(</p>)'.format(pad2), r'     <li>\2</li>', text)
+
+    # move table up if part of list
+    for space in [' ', '   ', '     ']:
+        text = re.sub(r'({}<li>.*</li>[\r\n])(<table>)([\s\S]+)(</table>)([\r\n]{}<li>)'.format(space, space), r'\1{}<table>\3</table>\5'.format(space), text)
 
     # list -> closings detected by spaces set before <li>
     text = re.sub(r'([\r\n]<p>)(.*)(</p>[\r\n])(     <li>)', r'\1\2\3<ol>\n  <ol>\n    <ol class="bull">\n\4', text)
