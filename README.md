@@ -36,7 +36,14 @@ Additional arguments:
 - Point of contact: **Andrea Kölsch**
 - HTML converter `convertx` nearly done.
 - tbd: choose WordPress plugin ([wpeverest](https://wpeverest.com/wordpress-plugins/everest-forms/) or [mammoth](https://de.wordpress.org/plugins/mammoth-docx-converter/) or [seraphinite](https://www.pluginforthat.com/plugin/seraphinite-post-docx-source/))
-- tbd: Auto-upload of files to WordPress
+- tbd: Auto-upload of files to WordPress -->  streamline the process of uploading [Google Docs to WordPress](https://kinsta.com/blog/google-docs-to-wordpress/) by:
+     0. Save the documents in Google docs?
+     1. Switch to the Gutenberg Block Editor
+     2. Try Wordable to Streamline the Google Docs to WordPress Workflow
+     3. Install the Mammoth .docx Converter Plugin
+     4. Use the Jetpack WordPress.com for Google Docs Add-On
+     5. Convert to Markdown with the Docs to Markdown Add-On
+     6. Give Writers a WordPress Account
 
 ### Bibleserver
 - Point of contact: **Timotheus Israel**
