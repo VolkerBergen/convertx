@@ -2,6 +2,7 @@
 
 import re
 import os
+import random
 from copy import copy
 
 try:
@@ -18,10 +19,15 @@ COLOR = '#004161'
 def detect_language(text):
     if pycld2 is None:
         return None
-    raw_text = re.sub(r'[^a-zA-Z0-9\s]', r'', text)
+
+    raw_text = re.sub(r'(<[^>]*>)', r' ', text)
+    raw_text = re.sub(r'[^a-zA-Z\säöüß]', r'', raw_text)
+    raw_text = re.sub(r'( \w )', r' ', raw_text)
+    raw_text = ' '.join(random.sample(raw_text.split(),100))   # pick randomly 100 words
     reliable, index, top_3_choices = pycld2.detect(raw_text, bestEffort=False)
     if not reliable:
         reliable, index, top_3_choices = pycld2.detect(raw_text, bestEffort=True)
+
     return top_3_choices[0][1]
 
 
@@ -29,6 +35,7 @@ def detect_language(text):
 
 def style_mappings(text, title=None):
     text_raw = copy(text)
+    print(title)
 
     text = standardize(text)
     text = regexp_style_mappings(text)
@@ -40,7 +47,7 @@ def style_mappings(text, title=None):
     text = format_lists(text)
     assertion_test(text, text_raw, title)
 
-    lang = detect_language(text)
+    lang = detect_language(text_raw)
     text = format_language(text, lang)
 
     if lang == 'de':
@@ -138,7 +145,7 @@ def regexp_style_mappings(text):
         for i in range(len(vals) - 1):
             text = re.sub(r'(<ol><li>)(.*)(</li>[\r\n]</ol>)(<p>)({}\.)'.format(vals[i]), r'<p>{}.\2</p>\n\4\5'.format(vals[i + 1]), text)
 
-        # ordered lists -> add paddings to [a-n], [iv]
+        # ordered lists -> add paddings to [a-n], [ivx]
         pad0 = r'<p style="padding-left: {};">'.format(PADDINGS[0])
         pad1 = r'<p style="padding-left: {};">'.format(PADDINGS[1])
 
@@ -341,12 +348,12 @@ def assertion_test(text, text_orig, title):
         if count_open != count_close:
             print('{} Unbalanced <{}>: {} <> {}'.format(title_with_space, item, count_open, count_close))
         if (item == 'ol') and (text_orig.count('<ol>') > 0):
-            print('{} {} <ol> in raw html detected'.format(' ' *len(title_with_space), text_orig.count("<ol>")))
+            print('{} {} <ol> in raw html detected'.format(title_with_space, text_orig.count("<ol>")))
 
     if text.count('. (Vers ') > 0:
         print('{} {} verse not correctly formatted'.format(title_with_space, text.count("(Vers ")))
     if text.count('style="padding-left') > 0:
-        print('{} Some bullets not correctly formatted'.format(title_with_space))
+        print('{} {} bullets not correctly formatted'.format(title_with_space), text.count('style="padding-left'))
 
     if False:  #check quotation marks later
         count_open, count_close = text.count('&bdquo;'), text.count('&ldquo;')
