@@ -52,6 +52,7 @@ def style_mappings(text, title=None):
     if lang == 'de':
         bible_check(text, title)
 
+    text = final_cut(text)
     #text = format_ascii(text)  # Do we need this?
     return text
 
@@ -335,6 +336,12 @@ def format_language(text, lang=None):
 
         text = text.replace('&bdquo;', '&ldquo;')
         text = text.replace('&sbquo;', '&lsquo;')
+    return text
+
+
+def final_cut(text):
+    text = text.replace('<h2>', '<h1>')
+    text = text.replace('</h2>', '</h1>')
     return text
 
 
