@@ -25,7 +25,6 @@ Additional arguments:
 - `--output-dir=output`  (directory for generated HTML)
 - `--input-dir=Deutsch`  (sub-/directories to include)
 
----
 
 Project Outline
 ---------------
@@ -42,7 +41,7 @@ Enduring Word
 - Point of contact: **Andrea Kölsch**
 - HTML converter `convertx` done.
 - tbd: choose WordPress plugin (`wpeverest <https://wpeverest.com/wordpress-plugins/everest-forms/>`_, `mammoth <https://de.wordpress.org/plugins/mammoth-docx-converter/>`_ or `seraphinite <https://www.pluginforthat.com/plugin/seraphinite-post-docx-source/>`_)
-- tbd: Auto-upload of files to WordPress -->  streamline the process of uploading `Google Docs to WordPress <https://kinsta.com/blog/google-docs-to-wordpress/>`_ by:
+- tbd: streamline the process of uploading `Google Docs to WordPress <https://kinsta.com/blog/google-docs-to-wordpress/>`_ by:
      1. Switch to the Gutenberg Block Editor
      2. Try Wordable to Streamline the Google Docs to WordPress Workflow
      3. Install the Mammoth .docx Converter Plugin
