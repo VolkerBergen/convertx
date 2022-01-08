@@ -347,7 +347,8 @@ def assertion_test(text, text_orig, title):
         if count_open != count_close:
             print('{} Unbalanced <{}>: {} <> {}'.format(title_with_space, item, count_open, count_close))
         if (item == 'ol') and (text_orig.count('<ol>') > 0):
-            print('{} {} <ol> in raw html detected'.format(title_with_space, text_orig.count("<ol>")))
+            text_sample = ' '.join(re.findall(r'<ol>(.*)</ol>', text_orig).split()[:10])
+            print('{} {} <ol> in raw html detected: {}'.format(title_with_space, text_orig.count("<ol>"), text_sample))
 
     if text.count('. (Vers ') > 0:
         print('{} {} verse not correctly formatted'.format(title_with_space, text.count("(Vers ")))
