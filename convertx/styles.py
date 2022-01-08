@@ -4,11 +4,7 @@ import re
 import os
 import random
 from copy import copy
-
-try:
-    import pycld2
-except ImportError:
-    pycld2 = None
+import pycld2
 
 PADDINGS = ['30px', '60px', '80px']
 COLOR = '#004161'
@@ -17,9 +13,6 @@ COLOR = '#004161'
 """Utilies"""
 
 def detect_language(text):
-    if pycld2 is None:
-        return None
-
     raw_text = re.sub(r'(<[^>]*>)', r' ', text)
     raw_text = re.sub(r'[^a-zA-Z\säöüß]', r'', raw_text)
     raw_text = re.sub(r'( \w )', r' ', raw_text)
@@ -262,6 +255,7 @@ def format_lists(text):
         text = re.sub(r'({}<li>.*</li>[\r\n])(<table>)([\s\S]+)(</table>)([\r\n]{}<li>)'.format(space, space), r'\1{}<table>\3</table>\5'.format(space), text)
 
     # list -> closings detected by spaces set before <li>
+    text = re.sub(r'([\r\n]<h4>)(.*)(</h4>[\r\n])(     <li>)', r'\1\2\3<ol>\n  <ol>\n    <ol class="bull">\n\4', text)
     text = re.sub(r'([\r\n]<p>)(.*)(</p>[\r\n])(     <li>)', r'\1\2\3<ol>\n  <ol>\n    <ol class="bull">\n\4', text)
     text = re.sub(r'([\r\n] <li>)(.*)(</li>[\r\n])(     <li>)', r'\1\2\3  <ol>\n    <ol class="bull">\n\4', text)
     text = re.sub(r'([\r\n]   <li>)(.*)(</li>[\r\n])(     <li>)', r'\1\2\3    <ol class="bull">\n\4', text)

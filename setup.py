@@ -12,7 +12,7 @@ setup(
     packages=find_packages(),
     entry_points={"console_scripts": ["convertx=convertx.cli:main"]},
     keywords="docx word clean html markdown md",
-    install_requires=["mammoth==1.4.18", "cobble>=0.1.3,<0.2", "html2text"],
+    install_requires=["mammoth==1.4.18", "cobble>=0.1.3,<0.2", "html2text", "pycld2"],
     python_requires='>=2.7',
     license="BSD-2-Clause",
     classifiers=[
