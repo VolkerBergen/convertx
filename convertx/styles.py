@@ -196,6 +196,9 @@ def regexp_style_mappings(text):
         # add space before '('
         text = re.sub(r'([^\s])(\()', r'\1 \2', text)
 
+    # header 4 in preface
+    text = re.sub(r'(<p>)(|<b>|<em>)(\d{1,3}\. )(.*)(</p>)', r'<h4>\3\4</h4>', text)
+
     return text
 
 
