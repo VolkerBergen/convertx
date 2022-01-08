@@ -1,18 +1,14 @@
-# Word-to-HTML/JSON (for EnduringWord commentary) 
+ConvertX
+========
 
-We aim to build a converter for our german translations (see [ICF project](https://bibel-kommentar.de)) of the 
-Enduring Word commentary from Word to HTML/JSON, in order to publish it at 
-[Enduring Word](https://de.enduringword.com/) and [Bibleserver](https://bibleserver.com/) . 
+Converting Word-to-HTML/JSON, in order to publish our german translations
+(see [ICF project](https://bibel-kommentar.de)) Enduring Word commentary at
+[Enduring Word](https://de.enduringword.com/) and [Bibleserver](https://bibleserver.com/).
 
-#### Important ressources:
-- (Input) Word-files at OneDrive.
-- (Output) HTML/JSON at [/examples](https://github.com/VolkerBergen/bible_commentary/tree/main/examples).
+How to convertX
+---------------
 
-## ConvertX
-
-Our Python implementation `convertx` converts Docx-to-HTML. 
-
-Installation: `pip install git+https://github.com/VolkerBergen/convertx`
+Installation: `pip install -U convertx`
 
 CLI (single file)
 - `convertx document.docx output.html`
@@ -26,7 +22,13 @@ Additional arguments:
 - `--output-dir=output`  (directory for generated HTML)
 - `--input-dir=Deutsch`  (sub-/directories to include)
 
-## Project Outline
+Project Outline
+---------------
+
+File formats:
+- (Input-format) Word-files at OneDrive.
+- (Output-format) HTML/JSON at [/examples](https://github.com/VolkerBergen/bible_commentary/tree/main/examples).
+
 
 ### Enduring Word
 - Point of contact: **Andrea Kölsch**

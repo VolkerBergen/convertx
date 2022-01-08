@@ -5,7 +5,7 @@ setup(
     name='convertx',
     version='0.1',
     description='Convert Word documents (docx) to clean HTML and Markdown',
-    long_description=open(os.path.join(os.path.dirname(__file__), 'README.md')).read(),
+    long_description=open(os.path.join(os.path.dirname(__file__), 'README.rst')).read(),
     author='Volker Bergen',
     author_email='email@volkerbergen.de',
     url='http://github.com/VolkerBergen/convertx',
