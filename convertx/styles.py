@@ -35,7 +35,6 @@ def detect_language(text):
 
 def style_mappings(text, title=None):
     text_raw = copy(text)
-    print(title)
 
     text = standardize(text)
     text = regexp_style_mappings(text)
