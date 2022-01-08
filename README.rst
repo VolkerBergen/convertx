@@ -8,22 +8,22 @@ Converting Word-to-HTML/JSON, in order to publish our german translations
 How to convertX
 ---------------
 
-Installation: `pip install -U convertx`
+Installation: ``pip install -U convertx``
 
 CLI (single file)
 
-- `convertx document.docx output.html`
-- `convertx document.docx output.md`
+- ``convertx document.docx output.html``
+- ``convertx document.docx output.md``
 
 CLI (full directory)
 
-- `cd` into directory and run `convertx html`
-- `cd` into directory and run `convertx markdown`
+- ``cd`` into directory and run ``convertx html``
+- ``cd`` into directory and run ``convertx markdown``
 
 Additional arguments:
 
-- `--output-dir=output`  (directory for generated HTML)
-- `--input-dir=Deutsch`  (sub-/directories to include)
+- ``--output-dir=output``  (directory for generated HTML)
+- ``--input-dir=Deutsch``  (sub-/directories to include)
 
 
 Project Outline
@@ -39,7 +39,7 @@ Enduring Word
 ^^^^^^^^^^^^^
 
 - Point of contact: **Andrea Kölsch**
-- HTML converter `convertx` done.
+- HTML converter ``convertx`` done.
 - tbd: choose WordPress plugin (`wpeverest <https://wpeverest.com/wordpress-plugins/everest-forms/>`_, `mammoth <https://de.wordpress.org/plugins/mammoth-docx-converter/>`_ or `seraphinite <https://www.pluginforthat.com/plugin/seraphinite-post-docx-source/>`_)
 - tbd: streamline the process of uploading `Google Docs to WordPress <https://kinsta.com/blog/google-docs-to-wordpress/>`_ by:
      1. Switch to the Gutenberg Block Editor
