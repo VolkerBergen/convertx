@@ -37,6 +37,7 @@ def style_mappings(text, title=None):
     text = add_copyright(text)
     text = format_bible_verses(text, title)
     text = format_lists(text)
+    text = format_quotes(text)
     assertion_test(text, text_raw, title)
 
     lang = detect_language(text_raw)
@@ -71,13 +72,15 @@ def standardize(text):
 
         text = text.replace('<strong>', '<b>')
         text = text.replace('</strong>', '</b>')
-        text = text.replace('<b>.', '.<b>')
-        text = text.replace('</b><b> ', '')
         text = text.replace('<b> ', ' <b>')
         text = text.replace(' </b>', '</b> ')
+        text = text.replace('<b>.</b>', '.')
+        text = text.replace('</b><b> ', '')
+        text = text.replace('<b>.', '.<b>')
 
         text = text.replace('<em> ', ' <em>')
         text = text.replace(' </em>', '</em> ')
+        text = text.replace('<em>.</em>', '.')
 
         text = text.replace('<li><ul>', '')
         text = text.replace('</ul></li>', '')
@@ -201,10 +204,12 @@ def regexp_style_mappings(text):
 
 
 def format_quotation_marks(text):
-    try:  # not compatible with py27 due to non-ascii characters
-        text = re.sub(r'‘\'|\'‘|‘‘|\'\'', '“', text)
-    except:
-        pass
+    # remove redundant character formatting
+    text = re.sub(r'<em>(\&[\w]+;)</em>', r'\1', text)
+    text = re.sub(r'<b>(\&[\w]+;)</b>', r'\1', text)
+
+    # two single quotes to double quote
+    text = re.sub(r'‘\'|\'‘|‘‘|\'\'', '“', text)
 
     # single quotes
     text = re.sub(r' \'(<em>)([^\']*)(</em>)\'', r' &sbquo;\1\2\3&lsquo;', text)
@@ -212,9 +217,13 @@ def format_quotation_marks(text):
     text = re.sub(r' \'([^\']*)\'', r' &sbquo;\1&lsquo;', text)
 
     # double quotes
-    text = re.sub(r'(\s|\(|>)&quot;(<b>)([^&quot;]*)(</b>)&quot;', r'\1&bdquo;\2\3\4&ldquo;', text)
-    text = re.sub(r'(\s|\(|>)&quot;(<em>)([^&quot;]*)(</em>)&quot;', r'\1&bdquo;\2\3\4&ldquo;', text)
-    text = re.sub(r'(\s|\(|>)&quot;([^&quot;]*)&quot;', r'\1&bdquo;\2&ldquo;', text)
+    text = re.sub(r'(&quot;|“)(|</em></b>)( \()', r'&ldquo;\2\3', text)
+    text = re.sub(r'(&quot;|“)(\))', r'&ldquo;\2)', text)
+    text = re.sub(r'( \()(|</em></b>)(&quot;|“)', r'\1\2&bdquo;', text)
+    text = re.sub(r'&quot;(\s?</p>)', r'&ldquo;\1', text)
+    text = re.sub(r'(\s|\(|>)&quot;(<b>)([^&\r\n]+)(</b>)&quot;', r'\1&bdquo;\2\3\4&ldquo;', text)
+    text = re.sub(r'(\s|\(|>)&quot;(<em>)([^&\r\n]+)(</em>)&quot;', r'\1&bdquo;\2\3\4&ldquo;', text)
+    #text = re.sub(r'(\s|\()&quot;([^&]*)&quot;', r'\1&bdquo;\2&ldquo;', text)
 
     # double quotes from word-specific symbols
     text = re.sub(r'„', r'&bdquo;', text)
@@ -226,13 +235,20 @@ def format_quotation_marks(text):
     text = re.sub(r'(\s|\(|>)&quot;([^\s\:\.\;\,])', r'\1&bdquo;\2', text)
     text = re.sub(r'([^\s])&quot;', r'\1&ldquo;', text)
     text = re.sub(r'(&ldquo;)([\w])', r'\1 \2', text)
-    text = re.sub(r'(&bdquo;.*?)([^$ldquo;][\.]|[\.][^$ldquo;])( \(.*?\))', r'\1\2&ldquo;\3', text)
+    text = re.sub(r': &quot;|: „', r': &bdquo;', text)
+    #text = re.sub(r'(&bdquo;.*?)([^&ldquo;][\.]|[\.][^&ldquo;])( \(.*?\))', r'\1\2&ldquo;\3', text)
 
     # single quotes if no more than 3 words
-    single_term = '\w+|[^\s]+\-[^\s]+|[^\s]+\s[^\s]+|[^\s]+\s[^\s]+\s[^\s]+'
-    text = re.sub(r'(&bdquo;)({})(&bdquo;|&ldquo;)'.format(single_term), r'&sbquo;\2&lsquo;', text)
-    text = re.sub(r'(&bdquo;)(<b>)({})(</b>)(&bdquo;|&ldquo;)'.format(single_term), r'&sbquo;\2\3\4&lsquo;', text)
-    text = re.sub(r'(&bdquo;)(<em>)({})(</em>)(&bdquo;|&ldquo;)'.format(single_term), r'&sbquo;\2\3\4&lsquo;', text)
+    single_term = ['\w+|[^\s]+\-[^\s]+', '[^\s]+\s[^\s]+', '[^\s]+\s[^\s]+\s[^\s]+']
+    for term in single_term:
+        text = re.sub(r'(&bdquo;)({})(&bdquo;|&ldquo;)'.format(term), r'&sbquo;\2&lsquo;', text)
+        text = re.sub(r'(&bdquo;)(<b>)({})(</b>)(&bdquo;|&ldquo;)'.format(term), r'&sbquo;\2\3\4&lsquo;', text)
+        text = re.sub(r'(&bdquo;)(<em>)({})(</em>)(&bdquo;|&ldquo;)'.format(term), r'&sbquo;\2\3\4&lsquo;', text)
+
+    # remove redundant character formatting
+    text = re.sub(r'<em>(\&[\w]+;)</em>', r'\1', text)
+    text = re.sub(r'<b>(\&[\w]+;)</b>', r'\1', text)
+
     return text
 
 
@@ -244,6 +260,30 @@ def align_styles(text):
             text = re.sub(r'(<p style="margin-top:-10; padding-left: {};">)(.*)(</p>\n)(<p>)([^\d])'.format(pad), r'\1\2<br />\5', text)
         text = re.sub(r'(<p style="font-weight: bold; color:{};">)(.*)(</p>\n)(<p>)([^\d])'.format(COLOR), r'\1\2<br />\5', text)
         text = re.sub(r'(<p style="margin-top:-10; font-weight: bold; color:{};">)(.*)(</p>\n)(<p>)([^\d])'.format(COLOR), r'\1\2\3\1\5', text)
+    return text
+
+
+def format_quotes(text):
+    # change &amps for a moment
+    amps = ['&sbquo;', '&lsquo;', '&hellip;', '&ndash;', '&thinsp;']
+    for amp in amps:
+        text = text.replace(amp, amp.replace('&', '$'))
+
+    # missing closing quotation marks
+    quote_tag = '[^&\r\n]+'  # how to better define this as "anything but &ldquo;"
+    text = re.sub(r'(<li.*&bdquo;)({})( \(\w+\))(|</em>|</b>|\s)(\s?</li>)'.format(quote_tag), r'\1\2&ldquo;\3\4\5', text)
+    text = re.sub(r'(<li.*)(&bdquo;)({})(|</em>|</b>)(\.)(|</em>|</b>|\s)(</li>)'.format(quote_tag), r'\1\2\3\4\5&ldquo;\6\7', text)
+
+    # missing opening quotation marks
+    text = re.sub(r'(<li>)(|<em>|<b>|\s)({})(&ldquo; \(\w+\))(</li>)'.format(quote_tag), r'\1\2&bdquo;\3\4\5', text)
+    text = re.sub(r'(<li>)(|<em>|<b>|\s)({})(\.&ldquo;)(</li>)'.format(quote_tag), r'\1\2&bdquo;\3\4\5', text)
+
+    # change &amps back..
+    for amp in amps:
+        text = text.replace(amp.replace('&', '$'), amp)
+
+    # Finally handle these:
+    # &bdquo;\s, \s&ldquo;, &ldquo;. -> .&ldquo;
     return text
 
 
@@ -327,7 +367,7 @@ def format_bible_verses(text, title=None):
         text = re.sub(r'(<p class="verse"> )(.*)(&bdquo;)(.*)(  <small>)', r'\1\2&raquo;\4\5', text)
         text = re.sub(r'(<p class="verse"> )(.*)(&ldquo;)(.*)(  <small>)', r'\1\2&laquo;\4\5', text)
 
-    text = re.sub(r'(<p class="verse"> )(&raquo;)([^&]*)(  <small>)', r'\1\3\4', text)
+    text = re.sub(r'(<p class="verse"> )(&raquo;)([^&])(  <small>)', r'\1\3\4', text)
     text = re.sub(r',(&ldquo;)', r'\1,', text)
     return text
 
@@ -376,12 +416,17 @@ def assertion_test(text, text_orig, title):
     if text.count('. (Vers ') > 0:
         print('{} {} verse not correctly formatted'.format(title_with_space, text.count("(Vers ")))
     if text.count('style="padding-left') > 0:
-        print('{} {} bullets not correctly formatted'.format(title_with_space), text.count('style="padding-left'))
+        print('{} {} bullets not correctly formatted'.format(title_with_space, text.count('style="padding-left')))
 
-    if False:  #check quotation marks later
+    if True:  # check quotation marks
         count_open, count_close = text.count('&bdquo;'), text.count('&ldquo;')
         if count_open != count_close:
             print('{} Unbalanced quotation marks: {} <> {}'.format(title_with_space, count_open, count_close))
+
+            all_parts = re.findall(r'<li>(.*)</li>', text)
+            incorrect_parts = [t for t in all_parts if t.count("&bdquo;") != t.count("&ldquo;")]
+            print([re.sub(r'(<[^>]*>|&\w+;)', r' ', p)[:40] + '...' for p in incorrect_parts])
+            print()
 
 
 """Markdown mappings"""
