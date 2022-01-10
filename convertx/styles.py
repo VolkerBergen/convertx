@@ -425,7 +425,8 @@ def assertion_test(text, text_orig, title):
 
             all_parts = re.findall(r'<li>(.*)</li>', text)
             incorrect_parts = [t for t in all_parts if t.count("&bdquo;") != t.count("&ldquo;")]
-            incorrect_parts = [re.sub(r'(<[^>]*>|&\w+;)', r' ', p)[:40] for p in incorrect_parts]
+            incorrect_parts = [re.sub(r'(<[^>]*>|&\w+;)', r' ', p) for p in incorrect_parts]
+            incorrect_parts = [re.sub(r'  ', r' ', p)[:40] for p in incorrect_parts]
             for part in incorrect_parts:
                 print("Check:         ", '\"...{}...\"'.format(part))
             print()
