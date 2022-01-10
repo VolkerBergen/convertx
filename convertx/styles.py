@@ -72,8 +72,9 @@ def standardize(text):
         text = text.replace('<strong>', '<b>')
         text = text.replace('</strong>', '</b>')
         text = text.replace('<b>.', '.<b>')
-        text = text.replace('<b> ', ' <b>')
         text = text.replace('</b><b> ', '')
+        text = text.replace('<b> ', ' <b>')
+        text = text.replace(' </b>', '</b> ')
 
         text = text.replace('<em> ', ' <em>')
         text = text.replace(' </em>', '</em> ')
@@ -83,10 +84,13 @@ def standardize(text):
 
         text = text.replace('  ', ' ')
         text = text.replace('\t', '')
+        text = text.replace(' - ', ' &ndash; ')
+        text = text.replace('...', '&hellip;')
 
         try:  # not compatible with py27 due to non-ascii characters
             text = text.replace(' ', ' ')
             text = text.replace('­', '')
+            text = text.replace('…', '&hellip;')
         except:
             pass
     return text
@@ -197,6 +201,11 @@ def regexp_style_mappings(text):
 
 
 def format_quotation_marks(text):
+    try:  # not compatible with py27 due to non-ascii characters
+        text = re.sub(r'‘\'|\'‘|‘‘|\'\'', '“', text)
+    except:
+        pass
+
     # single quotes
     text = re.sub(r' \'(<em>)([^\']*)(</em>)\'', r' &sbquo;\1\2\3&lsquo;', text)
     text = re.sub(r' \'(<b>)([^\']*)(</b>)\'', r' &sbquo;\1\2\3&lsquo;', text)
@@ -277,7 +286,7 @@ def add_header(text):
               '      background-color: #fcfaf0;\n' \
               '      margin: 30px; margin-left: 4%; margin-right: 4%;\n' \
               '     }\n'
-    header += '  br {display: grid; margin-top: 2px; content: " ";}\n'
+    header += '  br {display: grid; margin-top: 5px; content: " ";}\n'
     header += '  ol {display: grid; list-style: lower-latin; gap: 10px; padding-left: 25px;}\n'
     header += '  ol.i {list-style: lower-roman; gap: 8px;}\n'
     header += '  ol.bull {list-style: square; gap: 5px;}\n'
@@ -307,10 +316,19 @@ def format_bible_verses(text, title=None):
     for h4 in [h4_1, h4_2]:
         h4_verse = r'{}(<p class="verse"> )(.*)(</p>)'.format(h4)
         if title[-1].isdigit():
-            text = re.sub(h4_verse, r'\1\7<hr>\8&bdquo;\9&ldquo;  <small>({},&thinsp;\3\4\5)</small>\10<hr>'.format(title), text)
+            #text = re.sub(h4_verse, r'\1\7<hr>\8&bdquo;\9&ldquo;  <small>({},&thinsp;\3\4\5)</small>\10<hr>'.format(title), text)
+            text = re.sub(h4_verse, r'\1\7<hr>\8\9  <small>({},&thinsp;\3\4\5)</small>\10<hr>'.format(title), text)
         else:
-            text = re.sub(h4_verse, r'\1\7<hr>\8&bdquo;\9&ldquo;  <small>({} \3\4\5)</small>\10<hr>'.format(title), text)
+            #text = re.sub(h4_verse, r'\1\7<hr>\8&bdquo;\9&ldquo;  <small>({} \3\4\5)</small>\10<hr>'.format(title), text)
+            text = re.sub(h4_verse, r'\1\7<hr>\8\9  <small>({} \3\4\5)</small>\10<hr>'.format(title), text)
     text = re.sub('(\d{1,3}),(\d{1,3})', r'\1,&thinsp;\2', text)
+
+    for _ in range(10):
+        text = re.sub(r'(<p class="verse"> )(.*)(&bdquo;)(.*)(  <small>)', r'\1\2&raquo;\4\5', text)
+        text = re.sub(r'(<p class="verse"> )(.*)(&ldquo;)(.*)(  <small>)', r'\1\2&laquo;\4\5', text)
+
+    text = re.sub(r'(<p class="verse"> )(&raquo;)([^&]*)(  <small>)', r'\1\3\4', text)
+    text = re.sub(r',(&ldquo;)', r'\1,', text)
     return text
 
 
