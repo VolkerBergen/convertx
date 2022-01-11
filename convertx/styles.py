@@ -241,11 +241,9 @@ def format_quotation_marks(text):
     #text = re.sub(r'(&bdquo;.*?)([^&ldquo;][\.]|[\.][^&ldquo;])( \(.*?\))', r'\1\2&ldquo;\3', text)
 
     # single quotes if no more than 3 words
-    single_term = ['\w+|[^\s]+\-[^\s]+', '[^\s]+\s[^\s]+', '[^\s]+\s[^\s]+\s[^\s]+']
+    single_term = ['\w+|[^\s<>]+\-[^\s<>]+', '[^\s<]+\s[^\s<>]+', '[^\s<>]+\s[^\s<>]+\s[^\s<>]+']
     for term in single_term:
-        text = re.sub(r'(&bdquo;)({})(&bdquo;|&ldquo;)'.format(term), r'&sbquo;\2&lsquo;', text)
-        text = re.sub(r'(&bdquo;)(<b>)({})(</b>)(&bdquo;|&ldquo;)'.format(term), r'&sbquo;\2\3\4&lsquo;', text)
-        text = re.sub(r'(&bdquo;)(<em>)({})(</em>)(&bdquo;|&ldquo;)'.format(term), r'&sbquo;\2\3\4&lsquo;', text)
+        text = re.sub(r'(&bdquo;)(<em>|<b>|)({})(</em>|</b>|)(&bdquo;|&ldquo;)'.format(term), r'&sbquo;\2\3\4&lsquo;', text)
 
     # remove redundant character formatting
     text = re.sub(r'<em>(\&[\w]+;)</em>', r'\1', text)
