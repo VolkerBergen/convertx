@@ -5,20 +5,11 @@ import os
 import random
 from copy import copy
 import pycld2
+from .book_ids import BOOK_DICT
 
+BOOKS = re.sub(r'([1-5]\s)', r'', '|'.join(list(BOOK_DICT.values())))
 PADDINGS = ['30px', '60px', '80px']
 COLOR = '#004161'
-
-# AT
-BOOKS = ['Mose', 'Josua', 'Richter', 'Rut', 'Samuel', 'Könige', 'Chronik', 'Esra', 'Nehemia', 'Esther', 'Hiob']
-BOOKS += ['Psalmen', 'Sprüche', 'Prediger', 'Hoheslied', 'Jesaja', 'Jeremia', ' Klagelieder', 'Hesekiel', 'Daniel', 'Hosea']
-BOOKS += ['Joel', 'Amos', 'Obadja', 'Jona', 'Micha', 'Nahum', 'Habakuk', 'Zephanja', 'Haggai', 'Sacharja', 'Maleachi']
-
-# NT
-BOOKS += ['Matthäus', 'Markus', 'Lukas', 'Johannes', 'Apostelgeschichte', 'Römer', 'Korinther']
-BOOKS += ['Galater', 'Epheser', 'Philipper', 'Kolosser', 'Thessalonicher', 'Timotheus', 'Titus']
-BOOKS += ['Philemon', 'Hebräer', 'Jakobus', 'Petrus', 'Johannes', 'Judas', 'Offenbarung']
-BOOKS = '|'.join(BOOKS)
 
 
 """Utilies"""
@@ -387,6 +378,10 @@ def format_bible_verses(text, title=None):
     # Vers should not be surrounded with quotation mark
     text = re.sub(r'(<p class="verse"> )(&raquo;)([^&])(  <small>)', r'\1\3\4', text)
     text = re.sub(r',(&ldquo;)', r'\1,', text)
+
+    # tender abbreviations
+    for abbr, name in BOOK_DICT.items():
+        text = re.sub(r'({}).'.format(abbr), r'{}'.format(name), text)
 
     # change '1 Korinther' to '1. Korinther'
     text = re.sub(r'([1-5])(|\s|&thinsp;)({})'.format(BOOKS), r'\1.&thinsp;\3', text)
