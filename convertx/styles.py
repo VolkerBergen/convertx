@@ -381,7 +381,7 @@ def format_bible_verses(text, title=None):
 
     # tender abbreviations
     for abbr, name in BOOK_DICT.items():
-        text = re.sub(r'({}).'.format(abbr), r'{}'.format(name), text)
+        text = re.sub(r'({})\.'.format(abbr), r'{}'.format(name), text)
 
     # change '1 Korinther' to '1. Korinther'
     text = re.sub(r'([1-5])(|\s|&thinsp;)({})'.format(BOOKS), r'\1.&thinsp;\3', text)
