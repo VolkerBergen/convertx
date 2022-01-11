@@ -9,6 +9,17 @@ import pycld2
 PADDINGS = ['30px', '60px', '80px']
 COLOR = '#004161'
 
+# AT
+BOOKS = ['Mose', 'Josua', 'Richter', 'Rut', 'Samuel', 'Könige', 'Chronik', 'Esra', 'Nehemia', 'Esther', 'Hiob']
+BOOKS += ['Psalmen', 'Sprüche', 'Prediger', 'Hoheslied', 'Jesaja', 'Jeremia', ' Klagelieder', 'Hesekiel', 'Daniel', 'Hosea']
+BOOKS += ['Joel', 'Amos', 'Obadja', 'Jona', 'Micha', 'Nahum', 'Habakuk', 'Zephanja', 'Haggai', 'Sacharja', 'Maleachi']
+
+# NT
+BOOKS += ['Matthäus', 'Markus', 'Lukas', 'Johannes', 'Apostelgeschichte', 'Römer', 'Korinther']
+BOOKS += ['Galater', 'Epheser', 'Philipper', 'Kolosser', 'Thessalonicher', 'Timotheus', 'Titus']
+BOOKS += ['Philemon', 'Hebräer', 'Jakobus', 'Petrus', 'Johannes', 'Judas', 'Offenbarung']
+BOOKS = '|'.join(BOOKS)
+
 
 """Utilies"""
 
@@ -317,6 +328,11 @@ def format_lists(text):
 
         text = re.sub(r'([\r\n]\s\s\s\s)(</ol>)(.*)([\r\n])([\s]?<|\s\s<ol)', r'\1\2\3\4  </ol>\n\5', text)
         text = re.sub(r'([\r\n]\s\s)(</ol>)(.*)([\r\n])(<h|<p|<t)', r'\1\2\3\4</ol>\n\5', text)
+
+    # start every list item with capital letter
+    callback = lambda pat: pat.group(1) + pat.group(2) + pat.group(3).upper()
+    text = re.sub(r'(<li>)(|<b>|<em>)([a-z])', callback, text)
+
     return text
 
 
@@ -363,12 +379,17 @@ def format_bible_verses(text, title=None):
             text = re.sub(h4_verse, r'\1\7<hr>\8\9  <small>({} \3\4\5)</small>\10<hr>'.format(title), text)
     text = re.sub('(\d{1,3}),(\d{1,3})', r'\1,&thinsp;\2', text)
 
+    # Use << ... >> quotation marks for Schlachter
     for _ in range(10):
         text = re.sub(r'(<p class="verse"> )(.*)(&bdquo;)(.*)(  <small>)', r'\1\2&raquo;\4\5', text)
         text = re.sub(r'(<p class="verse"> )(.*)(&ldquo;)(.*)(  <small>)', r'\1\2&laquo;\4\5', text)
 
+    # Vers should not be surrounded with quotation mark
     text = re.sub(r'(<p class="verse"> )(&raquo;)([^&])(  <small>)', r'\1\3\4', text)
     text = re.sub(r',(&ldquo;)', r'\1,', text)
+
+    # change '1 Korinther' to '1. Korinther'
+    text = re.sub(r'([1-5])(|\s|&thinsp;)({})'.format(BOOKS), r'\1.&thinsp;\3', text)
     return text
 
 
