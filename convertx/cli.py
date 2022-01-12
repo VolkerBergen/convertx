@@ -46,7 +46,7 @@ def main():
     else:
         args = _parse_args()
 
-        is_valid = (not '~$' in args.path)
+        is_valid = (not '~$' in args.path) and (not '/._' in  args.path)
         is_selected = (args.input_dir is None) or (args.input_dir in args.path)
 
         if is_valid and is_selected:
