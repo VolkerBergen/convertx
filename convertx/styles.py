@@ -493,12 +493,12 @@ def bible_check(text, title):
     title_with_space = title + ' ' * (15 - len(re.sub(r'[^a-zA-Z0-9\s]', r'', title)))
 
     bible = load_bible().lower()
-    verses = re.findall(r'<hr><p class="verse"> &bdquo;(.*)&ldquo;  <small>', text.lower())
-    verse_nums = re.findall(r'<hr><p class="verse"> &bdquo;.*&ldquo;  <small>\((.*)\)</small>', text.lower())
+    verses = re.findall(r'<hr><p class="verse"> (.*)  <small>', text.lower())
+    verse_nums = re.findall(r'<hr><p class="verse"> .*  <small>\((.*)\)</small>', text.lower())
 
     n = 0
     for vers, vers_num in zip(verses, verse_nums):
-        vers = copy(re.sub(r'<br />|<small>|<small>|&bdquo;|&ldquo;', r'', vers))
+        vers = copy(re.sub(r'<br />|<small>|<small>|&bdquo;|&ldquo;|&raquo;|&laquo;', r'', vers))
         vers = re.sub(r'[^a-zA-Z0-9\s]', r'', vers)
         vers = re.sub(r'[\r\n]', r' ', vers)
         vers = re.sub(r' \d{1,3} ', r' ', vers)
@@ -513,8 +513,13 @@ def bible_check(text, title):
     if len(verses) > 0:
         perc_covered = int(n / len(verses) * 100)
         if perc_covered < 60:
-            print('{} {}% of verses covered by Schlachter'.format(title_with_space, perc_covered))
+            print('{} only {}% of verses covered by Schlachter'.format(title_with_space, perc_covered))
 
+    #verses = re.findall(r'<p class="verse"> (.*)  <small>', text)
+    with_quotation = [v.startswith('&raquo;') and v.endswith('&laquo;') for v in verses]
+    frac_quotation = int(sum(with_quotation) / len(with_quotation) * 100)
+    if frac_quotation > 50:
+        print('{} {}% of verses are surrounded by quotation marks'.format(title_with_space, frac_quotation))
     return bible
 
 
