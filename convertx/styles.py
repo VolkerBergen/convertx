@@ -447,18 +447,17 @@ def assertion_test(text, text_orig, title):
     if text.count('style="padding-left') > 0:
         print('{} {} bullets not correctly formatted'.format(title_with_space, text.count('style="padding-left')))
 
-    if True:  # check quotation marks
-        count_open, count_close = text.count('&bdquo;'), text.count('&ldquo;')
-        if count_open != count_close:
-            print('{} Unbalanced quotation marks: {} <> {}'.format(title_with_space, count_open, count_close))
+    # check quotation marks
+    all_parts = re.findall(r'<li>(.*)</li>', text)
+    incorrect_parts = [t for t in all_parts if t.count("&bdquo;") != t.count("&ldquo;")]
+    if len(incorrect_parts)>0:
+        incorrect_parts = [re.sub(r'(<[^>]*>|&\w+;)', r' ', p) for p in incorrect_parts]
+        incorrect_parts = [re.sub(r'  ', r' ', p)[:40] for p in incorrect_parts]
 
-            all_parts = re.findall(r'<li>(.*)</li>', text)
-            incorrect_parts = [t for t in all_parts if t.count("&bdquo;") != t.count("&ldquo;")]
-            incorrect_parts = [re.sub(r'(<[^>]*>|&\w+;)', r' ', p) for p in incorrect_parts]
-            incorrect_parts = [re.sub(r'  ', r' ', p)[:40] for p in incorrect_parts]
-            for part in incorrect_parts:
-                print("Check:         ", '\"...{}...\"'.format(part))
-            print()
+        print('{} Unbalanced quotation marks: {} <> {}'.format(title_with_space, text.count('&bdquo;'), text.count('&ldquo;')))
+        for part in incorrect_parts:
+            print("Check:         ", '\"...{}...\"'.format(part))
+        print()
 
 
 """Markdown mappings"""
