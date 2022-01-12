@@ -53,10 +53,10 @@ def main():
             with open(args.path, "rb") as docx_fileobj:
 
                 if args.output_dir is None:
-                    output_path = args.output
+                    path, file = os.path.split(args.output)
                 else:
-                    output_path = os.path.join(args.output_dir, os.path.basename(args.output))
-                output_path = output_path.replace(' ', '')
+                    path, file = args.output_dir, os.path.basename(args.output)
+                output_path = os.path.join(path, file.replace(' ', ''))
 
                 result = convert(docx_fileobj).value
 

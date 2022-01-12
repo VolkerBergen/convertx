@@ -202,6 +202,10 @@ def regexp_style_mappings(text):
     text = re.sub(r'(<p>)(|<b>|<em>)(\d{1,3}\. )(.*)(</p>)', r'<h4>\3\4</h4>', text)
     text = re.sub(r'\.</h', '</h', text)
 
+    # make sure ... is surrounded by spaces
+    text = re.sub(r'([^\s<])(&hellip;)', r'\1 \2', text)
+    text = re.sub(r'(&hellip;)([^\s<])', r'\1 \2', text)
+
     return text
 
 
