@@ -33,10 +33,11 @@ def style_mappings(text, title=None):
 
     text = standardize(text)
     text = regexp_style_mappings(text)
-    text = format_quotation_marks(text)
     text = align_styles(text)
     text = add_header(text)
     text = add_copyright(text)
+
+    text = format_quotation_marks(text)
     text = format_bible_verses(text, title)
     text = format_lists(text)
     text = format_quotes(text)
@@ -91,6 +92,9 @@ def standardize(text):
         text = text.replace('\t', '')
         text = text.replace(' - ', ' &ndash; ')
         text = text.replace('...', '&hellip;')
+
+        text = text.replace('??', '?')
+        text = text.replace('!!', '!')
 
         try:  # not compatible with py27 due to non-ascii characters
             text = text.replace(' ', ' ')
@@ -244,8 +248,15 @@ def format_quotation_marks(text):
     text = re.sub(r': &quot;|: „', r': &bdquo;', text)
     #text = re.sub(r'(&bdquo;.*?)([^&ldquo;][\.]|[\.][^&ldquo;])( \(.*?\))', r'\1\2&ldquo;\3', text)
 
+    # quotation marks in standard font
+    text = re.sub(r'(<em>)(&bdquo;|&sbquo;)', r'\2\1', text)
+    text = re.sub(r'(<b>)(&bdquo;|&sbquo;)', r'\2\1', text)
+
+    text = re.sub(r'(&ldquo;|&lsquo;)(</em>)', r'\2\1', text)
+    text = re.sub(r'(&ldquo;|&lsquo;)(</b>)', r'\2\1', text)
+
     # single quotes if no more than 3 words
-    single_term = ['\w+|[^\s<>]+\-[^\s<>]+', '[^\s<]+\s[^\s<>]+', '[^\s<>]+\s[^\s<>]+\s[^\s<>]+']
+    single_term = ['\w+|[^\s<>&]+\-[^\s<>&]+', '[^\s<>&]+\s[^\s<>&]+', '[^\s<>&]+\s[^\s<>&]+\s[^\s<>&]+']
     for term in single_term:
         text = re.sub(r'(&bdquo;)(<em>|<b>|)({})(</em>|</b>|)(&bdquo;|&ldquo;)'.format(term), r'&sbquo;\2\3\4&lsquo;', text)
 
