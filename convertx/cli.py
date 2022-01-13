@@ -6,37 +6,30 @@ import sys
 from mammoth import convert, writers
 from html2text import html2text
 
-from .styles import style_mappings, style_mappings_md
+from .styles import style_mappings, style_mappings_md, check_comments
 
 
 def main():
-    command = 'find . -name "*docx*" -print0 | while IFS= read -r -d "" filename; do\n'
-    command += 'convertx "$filename" "${filename//docx/html}"\ndone'
-
     argv = [arg for arg in sys.argv if not arg.startswith('--')]
-    argv_dir = [arg for arg in sys.argv if arg.startswith('--')]
+    argv_dir = ' '.join([arg for arg in sys.argv if arg.startswith('--')])
 
-    if len(argv_dir) > 0:
-        command = command.replace('\ndone', ' {}\ndone'.format(' '.join(argv_dir)))
+    command = 'find . -name "*docx*" -print0 | while IFS= read -r -d "" filename; do\n'  # find docx files
+    command += 'convertx "$filename" "${filename//docx/html}"'  # execute convertx command
+    command += ' {}\ndone'.format(argv_dir)  # add input/output directories
 
-    if '--output-dir' in sys.argv[-1]:
-        path = sys.argv[-1].split('=')[-1]
-        if not os.path.exists(path):
-            os.makedirs(path)
-
-    # loop through directory for html conversion
-    if len(argv) == 1:
+    # `convertx` to loop through directory for conversion
+    if (len(argv) == 1):
         os.system(command)
 
-    # loop through directory for html conversion
+    # `convertx html` to loop through directory for conversion
     elif (len(argv) == 2) and ('html' in argv[-1]):
         os.system(command)
 
-    # loop through directory for markdown conversion
+    # `convertx markdown` to loop through directory for conversion
     elif (len(argv) == 2) and ('markdown' in argv[-1]):
         os.system(command.replace('html', 'md'))
 
-    # html conversion if only input file provided
+    # `convertx filename.docx` for html conversion into filename.html
     elif len(argv) == 2:
         filename_docx = argv[-1]
         filename_html = filename_docx.replace("docx", "html")
@@ -46,16 +39,20 @@ def main():
     else:
         args = _parse_args()
 
+        outdir = args.output_dir
+        if outdir is not None and not os.path.exists(outdir):
+            os.makedirs(outdir)
+
         is_valid = (not '~$' in args.path) and (not '/._' in  args.path)
         is_selected = (args.input_dir is None) or (args.input_dir in args.path)
 
         if is_valid and is_selected:
             with open(args.path, "rb") as docx_fileobj:
 
-                if args.output_dir is None:
+                if outdir is None:
                     path, file = os.path.split(args.output)
                 else:
-                    path, file = args.output_dir, os.path.basename(args.output)
+                    path, file = outdir, os.path.basename(args.output)
                 output_path = os.path.join(path, file.replace(' ', ''))
 
                 result = convert(docx_fileobj).value
@@ -70,6 +67,11 @@ def main():
 
                     result = html2text(result)
                     result = style_mappings_md(result)
+
+                else:
+                    raise ValueError('File format not supported.')
+
+                check_comments(args.path, title)
 
                 _write_output(output_path, result)
 

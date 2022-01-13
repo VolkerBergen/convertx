@@ -5,8 +5,11 @@ import os
 import random
 from copy import copy
 import pycld2
+import zipfile
+from lxml import etree
 from .book_ids import BOOK_DICT
 
+ooXMLns = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
 BOOKS = re.sub(r'([1-5]\s)', r'', '|'.join(list(BOOK_DICT.values())))
 PADDINGS = ['30px', '60px', '80px']
 COLOR = '#004161'
@@ -540,3 +543,17 @@ def spell_check(text):
         word_corrected = spell.correction(word)
         if word != word_corrected:
             print(word, spell.correction(word))
+
+
+"""Check for open comments in docx file"""
+def check_comments(docx_filename, title):
+    title_with_space = title + ' ' * (15 - len(re.sub(r'[^a-zA-Z0-9\s]', r'', title)))
+
+    docx_zip = zipfile.ZipFile(docx_filename)
+    try:  # errors if file contains no more comments
+        commentsXML = docx_zip.read('word/comments.xml')
+        comments = etree.XML(commentsXML).xpath('//w:comment',namespaces=ooXMLns)
+        print('{} {} unresolved comments left.'.format(title_with_space, len(comments)))
+
+    except:
+        pass
