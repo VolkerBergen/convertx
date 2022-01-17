@@ -11,6 +11,7 @@ from .book_ids import BOOK_DICT
 
 ooXMLns = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
 BOOKS = re.sub(r'([1-5]\s)', r'', '|'.join(list(BOOK_DICT.values())))
+BOOKS_NT = re.sub(r'([1-5]\s)', r'', '|'.join(list(BOOK_DICT.values())[-27:]))
 PADDINGS = ['30px', '60px', '80px']
 COLOR = '#004161'
 
@@ -44,6 +45,7 @@ def style_mappings(text, title=None):
     text = format_bible_verses(text, title)
     text = format_lists(text)
     text = format_quotes(text)
+
     assertion_test(text, text_raw, title)
 
     lang = detect_language(text_raw)
@@ -54,6 +56,8 @@ def style_mappings(text, title=None):
 
     text = final_cut(text)
     #text = format_ascii(text)  # Do we need this?
+
+    # code efficiency: styles ~0.1s, tests ~0.1s, lang ~0.15s, bible ~0.2s
     return text
 
 
@@ -443,6 +447,7 @@ def assertion_test(text, text_orig, title):
             print('{} Unbalanced <{}>: {} <> {}'.format(title_with_space, item, count_open, count_close))
         if (item == 'ol') and (text_orig.count('<ol>') > 0):
             text_sample = ' '.join(re.findall(r'<ol>(.*)</ol>', text_orig)[0].split()[:10])
+            # todo: get better printout of text samples, akin to quotation mark error msg
             print('{} {} <ol> in raw html detected: {}'.format(title_with_space, text_orig.count("<ol>"), text_sample))
 
     if text.count('. (Vers ') > 0:
@@ -481,8 +486,20 @@ def style_mappings_md(text):
 
 """Compare text with Schlachter bible text"""
 
-def load_bible():
-    file = os.path.join(os.path.dirname(__file__), 'Schlachter.txt')
+def load_bible(title=None):
+    path = os.path.dirname(__file__)
+    file = os.path.join(path, 'Schlachter.txt')
+
+    # todo: test against AT
+    if False and title is not None:
+        book_name = re.sub(r'[ÄÖÜäöüß]', r'', title)
+        book_name = re.sub(r'\d{1,3}| |[^a-zA-Z]', r'', book_name)
+        books_nt = re.sub(r'\d{1,3}| |[^a-zA-Z]', r'', BOOKS_NT)
+        if book_name not in books_nt:
+            print(book_name, "AT")
+            print(books_nt)
+            file = os.path.join(path, 'Schlachter_AT.txt')
+
     bible = open(file, 'rb').read().decode('ISO-8859-1')
     bible = re.sub(r'[^a-zA-Z0-9\s]', r'', bible)
     bible = re.sub(r'([\r\n])', r' ', bible)
@@ -494,7 +511,7 @@ def load_bible():
 def bible_check(text, title):
     title_with_space = title + ' ' * (15 - len(re.sub(r'[^a-zA-Z0-9\s]', r'', title)))
 
-    bible = load_bible().lower()
+    bible = load_bible(title).lower()
     verses = re.findall(r'<hr><p class="verse"> (.*)  <small>', text.lower())
     verse_nums = re.findall(r'<hr><p class="verse"> .*  <small>\((.*)\)</small>', text.lower())
 
