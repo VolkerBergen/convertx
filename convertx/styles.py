@@ -438,31 +438,45 @@ def final_cut(text):
 def assertion_test(text, text_orig, title):
     title_with_space = title + ' ' * (15 - len(re.sub(r'[^a-zA-Z0-9\s]', r'', title)))
 
-    for item in ['h2', 'h3', 'h4', 'p', 'ol', 'li']:
+    # unbalanced opening/closing items
+    for item in ['h2', 'h3', 'h4', 'p', 'li']:
         count_open = text.count('<{}'.format(item))
         count_close = text.count('</{}'.format(item))
         if count_open != count_close:
-            print('{} Unbalanced <{}>: {} <> {}'.format(title_with_space, item, count_open, count_close))
-        if (item == 'ol') and (text_orig.count('<ol>') > 0):
-            text_sample = ' '.join(re.findall(r'<ol>(.*)</ol>', text_orig)[0].split()[:10])
-            # todo: get better printout of text samples, akin to quotation mark error msg
-            print('{} {} <ol> in raw html detected: {}'.format(title_with_space, text_orig.count("<ol>"), text_sample))
+            print('{} Unbalanced <{}>: {} <> {}\n'.format(title_with_space, item, count_open, count_close))
 
+    # unbalanced list opening/closing items
+    count_open = text.count('<ol'.format(item))
+    count_close = text.count('</ol'.format(item))
+    if count_open != count_close:
+        print('{} Unbalanced list items: {} <> {}'.format(title_with_space, count_open, count_close))
+
+    if text_orig.count('<ol>') > 0:
+        text_samples = [' '.join(t.split()[:10]) for t in re.findall(r'<ol>(.*)</ol>', text_orig)]
+        text_samples = [re.sub(r'  ', r' ', re.sub(r'(<[^>]*>|&\w+;)', r' ', t)) for t in text_samples]
+        for sample in text_samples:
+            print("Check:         ", '\"{}...\"'.format(sample))
+        print()
+
+    # missing verse formatting
     if text.count('. (Vers ') > 0:
-        print('{} {} verse not correctly formatted'.format(title_with_space, text.count("(Vers ")))
+        print('{} {} verse not correctly formatted\n'.format(title_with_space, text.count("(Vers ")))
+
+    # missing list item formatting
     if text.count('style="padding-left') > 0:
-        print('{} {} bullets not correctly formatted'.format(title_with_space, text.count('style="padding-left')))
+        print('{} {} bullets not correctly formatted\n'.format(title_with_space, text.count('style="padding-left')))
 
-    # check quotation marks
+    # incorrect quotation marks
     all_parts = re.findall(r'<li>(.*)</li>', text)
-    incorrect_parts = [t for t in all_parts if t.count("&bdquo;") != t.count("&ldquo;")]
-    if len(incorrect_parts)>0:
-        incorrect_parts = [re.sub(r'(<[^>]*>|&\w+;)', r' ', p) for p in incorrect_parts]
-        incorrect_parts = [re.sub(r'  ', r' ', p)[:40] for p in incorrect_parts]
+    text_samples = [t for t in all_parts if t.count("&bdquo;") != t.count("&ldquo;")]
+    if len(text_samples)>0:
+        count_open, count_close = text.count('&bdquo;'), text.count('&ldquo;')
+        print('{} Unbalanced quotation marks: {} <> {}'.format(title_with_space, count_open, count_close))
 
-        print('{} Unbalanced quotation marks: {} <> {}'.format(title_with_space, text.count('&bdquo;'), text.count('&ldquo;')))
-        for part in incorrect_parts:
-            print("Check:         ", '\"...{}...\"'.format(part))
+        text_samples = [re.sub(r'(<[^>]*>|&\w+;)', r' ', t) for t in text_samples]
+        text_samples = [re.sub(r'  ', r' ', t)[:40] for t in text_samples]
+        for sample in text_samples:
+            print("Check:         ", '\"...{}...\"'.format(sample))
         print()
 
 
@@ -526,13 +540,13 @@ def bible_check(text, title):
     if len(verses) > 0:
         perc_covered = int(n / len(verses) * 100)
         if perc_covered < 60:
-            print('{} only {}% of verses covered by Schlachter'.format(title_with_space, perc_covered))
+            print('{} only {}% of verses covered by Schlachter.\n'.format(title_with_space, perc_covered))
 
     #verses = re.findall(r'<p class="verse"> (.*)  <small>', text)
     with_quotation = [v.startswith('&raquo;') and v.endswith('&laquo;') for v in verses]
     frac_quotation = int(sum(with_quotation) / len(with_quotation) * 100)
     if frac_quotation > 50:
-        print('{} {}% of verses are surrounded by quotation marks'.format(title_with_space, frac_quotation))
+        print('{} {}% of verses are surrounded by quotation marks.\n'.format(title_with_space, frac_quotation))
     return bible
 
 
@@ -564,7 +578,7 @@ def check_comments(docx_filename, title):
     try:  # errors if file contains no more comments
         commentsXML = docx_zip.read('word/comments.xml')
         comments = etree.XML(commentsXML).xpath('//w:comment',namespaces=ooXMLns)
-        print('{} {} unresolved comments left.'.format(title_with_space, len(comments)))
+        print('{} {} unresolved comments left.\n'.format(title_with_space, len(comments)))
 
     except:
         pass

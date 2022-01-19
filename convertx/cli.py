@@ -2,6 +2,7 @@ import argparse
 import io
 import os
 import sys
+from datetime import date
 
 from mammoth import convert, writers
 from html2text import html2text
@@ -55,9 +56,15 @@ def main():
                     path, file = outdir, os.path.basename(args.output)
                 output_path = os.path.join(path, file.replace(' ', ''))
 
-                if outdir is not None:
-                    output_file = os.path.join(path, "output.txt")
-                    sys.stdout = open(output_file, 'a')  # todo: reset at beginning
+                if args.stdout_write in ['true', 'only']:
+                    output_file = os.path.join(path, "format_errors.txt")
+                    if not os.path.exists(output_file):
+                        sys.stdout = open(output_file, 'a')
+                    if str(date.today()) not in open(output_file).readline():
+                        sys.stdout = open(output_file, 'w')  # reset
+                        print('{}\n\n'.format(date.today()))
+
+                    sys.stdout = open(output_file, 'a')
 
                 result = convert(docx_fileobj).value
 
@@ -77,7 +84,8 @@ def main():
 
                 check_comments(args.path, title)
 
-                _write_output(output_path, result)
+                if args.stdout_write != 'only':
+                    _write_output(output_path, result)
 
 
 def _write_output(path, contents):
@@ -105,6 +113,10 @@ def _parse_args():
     parser.add_argument(
         "--output-dir",
         help="Output directory for generated HTML.")
+
+    parser.add_argument(
+        "--stdout-write",
+        help="Output filepath for generated error messages.")
 
     return parser.parse_args()
 
