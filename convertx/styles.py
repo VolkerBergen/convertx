@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import re
 import os
 import random
@@ -490,14 +488,10 @@ def load_bible(title=None):
     path = os.path.dirname(__file__)
     file = os.path.join(path, 'Schlachter.txt')
 
-    # todo: test against AT
-    if False and title is not None:
-        book_name = re.sub(r'[ÄÖÜäöüß]', r'', title)
-        book_name = re.sub(r'\d{1,3}| |[^a-zA-Z]', r'', book_name)
-        books_nt = re.sub(r'\d{1,3}| |[^a-zA-Z]', r'', BOOKS_NT)
+    if title is not None:
+        book_name = re.sub(r'([aeiou]|)[^a-zA-Z\|]|\d{1,3}| ', r'', title)
+        books_nt = re.sub(r'([aeiou]|)[^a-zA-Z\|]|\d{1,3}| ', r'', BOOKS_NT)
         if book_name not in books_nt:
-            print(book_name, "AT")
-            print(books_nt)
             file = os.path.join(path, 'Schlachter_AT.txt')
 
     bible = open(file, 'rb').read().decode('ISO-8859-1')

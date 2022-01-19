@@ -13,7 +13,7 @@ def main():
     argv = [arg for arg in sys.argv if not arg.startswith('--')]
     argv_dir = ' '.join([arg for arg in sys.argv if arg.startswith('--')])
 
-    command = 'find . -name "*docx*" -print0 | while IFS= read -r -d "" filename; do\n'  # find docx files
+    command = 'find -s . -name "*docx*" -print0 | while IFS= read -r -d "" filename; do\n'  # find docx files
     command += 'convertx "$filename" "${filename//docx/html}"'  # execute convertx command
     command += ' {}\ndone'.format(argv_dir)  # add input/output directories
 
@@ -54,6 +54,10 @@ def main():
                 else:
                     path, file = outdir, os.path.basename(args.output)
                 output_path = os.path.join(path, file.replace(' ', ''))
+
+                if outdir is not None:
+                    output_file = os.path.join(path, "output.txt")
+                    sys.stdout = open(output_file, 'a')  # todo: reset at beginning
 
                 result = convert(docx_fileobj).value
 
