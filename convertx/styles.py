@@ -556,7 +556,7 @@ def bible_check(text, title):
     #verses = re.findall(r'<p class="verse"> (.*)  <small>', text)
     text_samples = [v for v in verses if v.startswith('&raquo;') and v.endswith('&laquo;')]
     if len(text_samples) > 0:
-        print_msg(title, 'verses sorrounded by quotation marks')
+        print_msg(title, 'verses surrounded by quotation marks')
         print_check([sample.replace('&raquo;', '').replace('&laquo;', '') for sample in text_samples])
 
     return bible
