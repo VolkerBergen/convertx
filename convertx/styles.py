@@ -460,17 +460,6 @@ def assertion_test(text, text_orig, title):
         if count_open != count_close:
             print_msg(title, 'unbalanced <{}>: {} <> {}\n'.format(item, count_open, count_close))
 
-    # unbalanced list opening/closing items
-    count_open = text.count('<ol'.format(item))
-    count_close = text.count('</ol'.format(item))
-    if count_open != count_close:
-        print_msg(title, 'illegible list items')
-
-    if text_orig.count('<ol>') > 0:
-        text_samples = [t for t in re.findall(r'<ol>(.*)</ol>', text_orig)]
-        text_samples = [re.sub(r'  ', r' ', re.sub(r'(<[^>]*>|&\w+;)', r'', t))[:43] for t in text_samples]
-        print_check(text_samples)
-
     # missing verse formatting
     char = '. (Vers '
     if text.count(char) > 0:
@@ -479,15 +468,24 @@ def assertion_test(text, text_orig, title):
 
     # missing list item formatting
     if text.count('style="padding-left') > 0:
-        print_msg(title, 'unidentified list elements')
+        print_msg(title, 'unidentified list items')
         print_check(re.findall(r'style="padding-left (.*) [\r\n]', text)[0])
+
+    ## The following two (list items, quotation marks) are the most common format errors
+
+    # unbalanced list opening/closing items
+    if (text_orig.count('<ol>') > 0) or (text.count('<ol') != text.count('</ol')):
+        text_samples = [t for t in re.findall(r'<ol>(.*)</ol>', text_orig)]
+        text_samples = [re.sub(r'  ', r' ', re.sub(r'(<[^>]*>|&\w+;)', r'', t)) for t in text_samples]
+        print_msg(title, 'unidentified list items')
+        print_check(text_samples)
 
     # incorrect quotation marks
     all_parts = re.findall(r'<hr><p class="verse"> (.*)  <small>', text) + re.findall(r'<li>(.*)</li>', text)
     text_samples = [t for t in all_parts if t.count("&bdquo;") + t.count("&raquo;") != t.count("&ldquo;") + t.count("&laquo;")]
     if len(text_samples)>0:
         text_samples = [re.sub(r'(<[^>]*>|&\w+;)', r' ', t) for t in text_samples]
-        text_samples = [re.sub(r'  ', r' ', t)[:40] for t in text_samples]
+        text_samples = [re.sub(r'  ', r' ', t) for t in text_samples]
         print_msg(title, 'unidentified quotation marks')
         print_check(text_samples)
 
