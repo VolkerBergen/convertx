@@ -62,7 +62,10 @@ def main():
                         sys.stdout = open(output_file, 'a')
                     if str(date.today()) not in open(output_file).readline():
                         sys.stdout = open(output_file, 'w')  # reset
-                        print('{}\n\n'.format(date.today()))
+                        print('{}\n'.format(date.today()))
+
+                        sys.stdout = open(output_file, 'a')
+                        print('see --> https://youtu.be/9HIv-R8lg9I <-- for explanations.\n\n')
 
                     sys.stdout = open(output_file, 'a')
 
