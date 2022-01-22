@@ -435,49 +435,61 @@ def final_cut(text):
     return text
 
 
-def assertion_test(text, text_orig, title):
+def print_msg(title, msg, style='bold'):
     title_with_space = title + ' ' * (15 - len(re.sub(r'[^a-zA-Z0-9\s]', r'', title)))
+    start = ''  #'\x1B[3m' if style == 'italic' else '\033[1m' if style == 'bold' else ''
+    end = re.sub(r'(\[)\d{1}m', r'[0m', start)
+
+    print('{}{} {}{}'.format(start, title_with_space, msg, end))
+
+
+def print_check(sample):
+    if isinstance(sample, str):
+        sample = [sample]
+    for s in sample:
+        print('Check:          \"{}...\"'.format(s[:43]))
+    print()
+
+
+def assertion_test(text, text_orig, title):
 
     # unbalanced opening/closing items
     for item in ['h2', 'h3', 'h4', 'p', 'li']:
         count_open = text.count('<{}'.format(item))
         count_close = text.count('</{}'.format(item))
         if count_open != count_close:
-            print('{} Unbalanced <{}>: {} <> {}\n'.format(title_with_space, item, count_open, count_close))
+            print_msg(title, 'unbalanced <{}>: {} <> {}\n'.format(item, count_open, count_close))
 
     # unbalanced list opening/closing items
     count_open = text.count('<ol'.format(item))
     count_close = text.count('</ol'.format(item))
     if count_open != count_close:
-        print('{} Unbalanced list items: {} <> {}'.format(title_with_space, count_open, count_close))
+        print_msg(title, 'illegible list items')
 
     if text_orig.count('<ol>') > 0:
-        text_samples = [' '.join(t.split()[:10]) for t in re.findall(r'<ol>(.*)</ol>', text_orig)]
-        text_samples = [re.sub(r'  ', r' ', re.sub(r'(<[^>]*>|&\w+;)', r' ', t)) for t in text_samples]
-        for sample in text_samples:
-            print("Check:         ", '\"{}...\"'.format(sample))
-        print()
+        text_samples = [t for t in re.findall(r'<ol>(.*)</ol>', text_orig)]
+        text_samples = [re.sub(r'  ', r' ', re.sub(r'(<[^>]*>|&\w+;)', r'', t))[:43] for t in text_samples]
+        print_check(text_samples)
 
     # missing verse formatting
-    if text.count('. (Vers ') > 0:
-        print('{} {} verse not correctly formatted\n'.format(title_with_space, text.count("(Vers ")))
+    char = '. (Vers '
+    if text.count(char) > 0:
+        print_msg(title, 'unidentified bible verses')
+        print_check(re.findall(r'\. (\(Vers .*) [\r\n]', text))
 
     # missing list item formatting
     if text.count('style="padding-left') > 0:
-        print('{} {} bullets not correctly formatted\n'.format(title_with_space, text.count('style="padding-left')))
+        print_msg(title, 'unidentified list elements')
+        print_check(re.findall(r'style="padding-left (.*) [\r\n]', text)[0])
 
     # incorrect quotation marks
-    all_parts = re.findall(r'<li>(.*)</li>', text)
-    text_samples = [t for t in all_parts if t.count("&bdquo;") != t.count("&ldquo;")]
+    all_parts = re.findall(r'<hr><p class="verse"> (.*)  <small>', text) + re.findall(r'<li>(.*)</li>', text)
+    text_samples = [t for t in all_parts if t.count("&bdquo;") + t.count("&raquo;") != t.count("&ldquo;") + t.count("&laquo;")]
     if len(text_samples)>0:
-        count_open, count_close = text.count('&bdquo;'), text.count('&ldquo;')
-        print('{} Unbalanced quotation marks: {} <> {}'.format(title_with_space, count_open, count_close))
-
         text_samples = [re.sub(r'(<[^>]*>|&\w+;)', r' ', t) for t in text_samples]
         text_samples = [re.sub(r'  ', r' ', t)[:40] for t in text_samples]
-        for sample in text_samples:
-            print("Check:         ", '\"...{}...\"'.format(sample))
-        print()
+        print_msg(title, 'unidentified quotation marks')
+        print_check(text_samples)
 
 
 """Markdown mappings"""
@@ -517,7 +529,6 @@ def load_bible(title=None):
 
 
 def bible_check(text, title):
-    title_with_space = title + ' ' * (15 - len(re.sub(r'[^a-zA-Z0-9\s]', r'', title)))
 
     bible = load_bible(title).lower()
     verses = re.findall(r'<hr><p class="verse"> (.*)  <small>', text.lower())
@@ -540,13 +551,14 @@ def bible_check(text, title):
     if len(verses) > 0:
         perc_covered = int(n / len(verses) * 100)
         if perc_covered < 60:
-            print('{} only {}% of verses covered by Schlachter.\n'.format(title_with_space, perc_covered))
+            print_msg(title, 'only {}% of verses covered by Schlachter'.format(perc_covered), style='italic')
 
     #verses = re.findall(r'<p class="verse"> (.*)  <small>', text)
-    with_quotation = [v.startswith('&raquo;') and v.endswith('&laquo;') for v in verses]
-    frac_quotation = int(sum(with_quotation) / len(with_quotation) * 100)
-    if frac_quotation > 50:
-        print('{} {}% of verses are surrounded by quotation marks.\n'.format(title_with_space, frac_quotation))
+    text_samples = [v for v in verses if v.startswith('&raquo;') and v.endswith('&laquo;')]
+    if len(text_samples) > 0:
+        print_msg(title, 'verses sorrounded by quotation marks')
+        print_check([sample.replace('&raquo;', '').replace('&laquo;', '') for sample in text_samples])
+
     return bible
 
 
@@ -572,13 +584,12 @@ def spell_check(text):
 
 """Check for open comments in docx file"""
 def check_comments(docx_filename, title):
-    title_with_space = title + ' ' * (15 - len(re.sub(r'[^a-zA-Z0-9\s]', r'', title)))
 
     docx_zip = zipfile.ZipFile(docx_filename)
     try:  # errors if file contains no more comments
         commentsXML = docx_zip.read('word/comments.xml')
         comments = etree.XML(commentsXML).xpath('//w:comment',namespaces=ooXMLns)
-        print('{} {} unresolved comments left.\n'.format(title_with_space, len(comments)))
+        print_msg(title, 'has {} unresolved comments left'.format(len(comments)), style='italic')
 
     except:
         pass
