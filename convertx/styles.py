@@ -33,26 +33,27 @@ def detect_language(text):
 def style_mappings(text, title=None):
     text_raw = copy(text)
 
-    text = standardize(text)
-    text = regexp_style_mappings(text)
-    text = align_styles(text)
-    text = add_header(text)
-    text = add_copyright(text)
+    if True:
+        text = standardize(text)
+        text = regexp_style_mappings(text)
+        text = align_styles(text)
+        text = add_header(text)
+        text = add_copyright(text)
 
-    text = format_quotation_marks(text)
-    text = format_bible_verses(text, title)
-    text = format_lists(text)
-    text = format_quotes(text)
+        text = format_quotation_marks(text)
+        text = format_bible_verses(text, title)
+        text = format_lists(text)
+        text = format_quotes(text)
 
-    assertion_test(text, text_raw, title)
+        assertion_test(text, text_raw, title)
 
-    lang = detect_language(text_raw)
-    text = format_language(text, lang)
+        lang = detect_language(text_raw)
+        text = format_language(text, lang)
 
-    if lang == 'de':
-        bible_check(text, title)
+        if lang == 'de':
+            bible_check(text, title)
 
-    text = final_cut(text)
+        text = final_cut(text)
     #text = format_ascii(text)  # Do we need this?
 
     # code efficiency: styles ~0.1s, tests ~0.1s, lang ~0.15s, bible ~0.2s
@@ -453,12 +454,13 @@ def print_check(sample):
 
 def assertion_test(text, text_orig, title):
 
-    # unbalanced opening/closing items
-    for item in ['h2', 'h3', 'h4', 'p', 'li']:
-        count_open = text.count('<{}'.format(item))
-        count_close = text.count('</{}'.format(item))
-        if count_open != count_close:
-            print_msg(title, 'unbalanced <{}>: {} <> {}\n'.format(item, count_open, count_close))
+    # unbalanced opening/closing element for <p>
+    if text.count('<p') != text.count('</p'):
+        print_msg(title, 'some text is not identifable')
+
+    # unbalanced opening/closing element for <li>
+    if text.count('<li') != text.count('</li'):
+        print_msg(title, 'incorrect list item (e.g., i. followed by i.)')
 
     # missing verse formatting
     char = '. (Vers '
