@@ -2,7 +2,7 @@ import argparse
 import io
 import os
 import sys
-from datetime import date
+from datetime import date, datetime
 
 from mammoth import convert, writers
 from html2text import html2text
@@ -46,6 +46,9 @@ def main():
 
         is_valid = (not '~$' in args.path) and (not '/._' in  args.path)
         is_selected = (args.input_dir is None) or (args.input_dir in args.path)
+
+        mtime = datetime.fromtimestamp(os.path.getmtime(args.path)).strftime('%Y-%m-%d')
+        #is_selected &= (mtime >= '2021-05-01')
 
         if is_valid and is_selected:
             with open(args.path, "rb") as docx_fileobj:

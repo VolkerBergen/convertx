@@ -470,8 +470,10 @@ def assertion_test(text, text_orig, title):
 
     # missing list item formatting
     if text.count('style="padding-left') > 0:
-        print_msg(title, 'unidentified list items')
-        print_check(re.findall(r'style="padding-left (.*) [\r\n]', text)[0])
+        print_msg(title, 'unidentified list item formats')
+        text_samples = re.findall(r'style="padding-left (.*) [\r\n]', text)
+        if len(text_samples) > 0:
+            print_check(re.findall(r'style="padding-left (.*) [\r\n]', text)[0])
 
     ## The following two (list items, quotation marks) are the most common format errors
 
