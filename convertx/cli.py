@@ -2,96 +2,81 @@ import argparse
 import io
 import os
 import sys
-from datetime import date, datetime
+from datetime import date
 
-from mammoth import convert, writers
 from html2text import html2text
+from mammoth import convert
 
 from .styles import style_mappings, style_mappings_md, check_comments
 
 
 def main():
-    argv = [arg for arg in sys.argv if not arg.startswith('--')]
-    argv_dir = ' '.join([arg for arg in sys.argv if arg.startswith('--')])
+    args = _parse_args()
+    if args.output_dir is None:
+        args.output_dir = args.command
 
-    command = 'find -s . -name "*docx*" -print0 | while IFS= read -r -d "" filename; do\n'  # find docx files
-    command += 'convertx "$filename" "${filename//docx/html}"'  # execute convertx command
-    command += ' {}\ndone'.format(argv_dir)  # add input/output directories
-
-    # `convertx` to loop through directory for conversion
-    if (len(argv) == 1):
-        os.system(command)
-
-    # `convertx html` to loop through directory for conversion
-    elif (len(argv) == 2) and ('html' in argv[-1]):
-        os.system(command)
-
-    # `convertx markdown` to loop through directory for conversion
-    elif (len(argv) == 2) and ('markdown' in argv[-1]):
-        os.system(command.replace('html', 'md'))
-
-    # `convertx filename.docx` for html conversion into filename.html
-    elif len(argv) == 2:
-        filename_docx = argv[-1]
-        filename_html = filename_docx.replace("docx", "html")
-        os.system('convertx "{}" "{}"'.format(filename_docx, filename_html))
-
-    # actual html or markdown conversion
+    files = []
+    if os.path.isdir(args.file_or_folder):
+        print("collecting files from folder {}".format(args.file_or_folder))
+        get_files_in_dir(files, args.file_or_folder, args.sub_input_dir_name)
+    elif os.path.isfile(args.file_or_folder):
+        files.append(args.file_or_folder)
     else:
-        args = _parse_args()
+        raise ValueError("File or directory {} not found".format(args.file_or_folder))
 
-        outdir = args.output_dir
-        if outdir is not None and not os.path.exists(outdir):
-            os.makedirs(outdir)
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
 
-        is_valid = (not '~$' in args.path) and (not '/._' in  args.path)
-        is_selected = (args.input_dir is None) or (args.input_dir in args.path)
+    for file in files:
+        folder_prefix = os.path.dirname(file).replace(os.sep, '_').replace(" ", "_") + "_" if args.command == "markdown" else ""
+        file_name_without_ext = os.path.splitext(os.path.basename(file))[0].replace(' ', '_')
+        output_ext = ".md" if args.command == "markdown" else ".html"
+        convert_file(file, os.path.join(args.output_dir, folder_prefix + file_name_without_ext + output_ext), args.dry_run)
+        pass
 
-        mtime = datetime.fromtimestamp(os.path.getmtime(args.path)).strftime('%Y-%m-%d')
-        #is_selected &= (mtime >= '2021-05-01')
 
-        if is_valid and is_selected:
-            with open(args.path, "rb") as docx_fileobj:
+def get_files_in_dir(files, base_dir, expected_sub_dir):
+    for file_or_dir in os.listdir(base_dir):
+        sub_dir = os.path.join(file_or_dir, expected_sub_dir)
+        if os.path.isdir(file_or_dir):
+            if os.path.exists(sub_dir):
+                files += [os.path.join(sub_dir, file) for file in os.listdir(sub_dir) if file.endswith(".docx")]
+            else:
+                get_files_in_dir(files, file_or_dir, expected_sub_dir)
+        elif os.path.isfile(file_or_dir) and file_or_dir.endswith(".docx"):
+            return files.append(file_or_dir)
 
-                if outdir is None:
-                    path, file = os.path.split(args.output)
-                else:
-                    path, file = outdir, os.path.basename(args.output)
-                output_path = os.path.join(path, file.replace(' ', ''))
 
-                if args.stdout_write in ['true', 'only']:
-                    output_file = os.path.join(path, "format_errors.txt")
-                    if not os.path.exists(output_file):
-                        sys.stdout = open(output_file, 'a')
-                    if str(date.today()) not in open(output_file).readline():
-                        sys.stdout = open(output_file, 'w')  # reset
-                        print('{}\n'.format(date.today()))
+def convert_file(input_file, output_file, dry_run):
+    with open(input_file, "rb") as docx_fileobj:201
+        format_errors_file = "format_errors.txt"
+        if not os.path.exists(format_errors_file):
+            sys.stdout = open(format_errors_file, 'a')
+        if str(date.today()) not in open(format_errors_file).readline():
+            sys.stdout = open(format_errors_file, 'w')  # reset
+            print('{}\n'.format(date.today()))
 
-                        sys.stdout = open(output_file, 'a')
-                        print('see --> https://youtu.be/9HIv-R8lg9I <-- for explanations.\n\n')
+            sys.stdout = open(format_errors_file, 'a')
+            print('see --> https://youtu.be/9HIv-R8lg9I <-- for explanations.\n\n')
 
-                    sys.stdout = open(output_file, 'a')
+        sys.stdout = open(format_errors_file, 'a')
 
-                result = convert(docx_fileobj).value
+        result = convert(docx_fileobj).value
 
-                if args.output.endswith('html'):
-                    title = args.output.split('/')[-1].strip('.html')
-                    result = style_mappings(result, title)
+        title = os.path.splitext(os.path.basename(output_file))[0]
+        result = style_mappings(result, title)
 
-                elif args.output.endswith('md'):
-                    title = args.output.split('/')[-1].strip('.md')
-                    result = style_mappings(result, title)
+        if output_file.endswith('md'):
+            result = html2text(result)
+            result = style_mappings_md(result)
 
-                    result = html2text(result)
-                    result = style_mappings_md(result)
+        else:
+            raise ValueError('File format not supported.')
 
-                else:
-                    raise ValueError('File format not supported.')
+        check_comments(input_file, title)
 
-                check_comments(args.path, title)
-
-                if args.stdout_write != 'only':
-                    _write_output(output_path, result)
+        if not dry_run:
+            _write_output(output_file, result)
 
 
 def _write_output(path, contents):
@@ -102,27 +87,28 @@ def _write_output(path, contents):
 def _parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "path",
-        metavar="docx-path",
-        help="Path to the .docx file to convert.")
+        "command",
+        help="Command to execute [html, markdown, json]")
 
     parser.add_argument(
-        "output",
-        nargs="?",
-        metavar="output-path",
-        help="Output path for the generated document.")
+        "file_or_folder",
+        help="File and folder to process")
 
     parser.add_argument(
-        "--input-dir",
-        help="Input directory for generated HTML.")
+        "--sub-input-dir-name",
+        default="",
+        help="Name of sub directory of input docx files.")
 
     parser.add_argument(
         "--output-dir",
+        default="",
         help="Output directory for generated HTML.")
 
     parser.add_argument(
-        "--stdout-write",
-        help="Output filepath for generated error messages.")
+        "--dry-run",
+        type=bool,
+        default=False,
+        help="only validate, do not write converted files.")
 
     return parser.parse_args()
 
