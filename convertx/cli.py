@@ -77,6 +77,7 @@ def combine_markdown_to_json(file_or_dir):
         chapter_canonical = int(match.group(1)) * 1000000 + int(match.group(3)) * 1000
         should_process_file = True
         # should_process_file = "Matthew" in file
+        # should_process_file = "043_John_Deutsch_Johannes_019" in file
         if should_process_file:
             get_logger().info("Processing file {}".format(file))
             with open(file, "r") as file_obj:
@@ -102,23 +103,31 @@ def wait_for_token(iterator, token_type, token_tag):
             if token.type == token_type and token.tag == token_tag:
                 break
         except StopIteration:
-            print("ERROR - wait_for_token {} {} - stopped unexpectedly".format(token_type, token_tag))
+            get_logger().error("wait_for_token {} {} - stopped unexpectedly".format(token_type, token_tag))
             break
 
 
 def handle_title(iterator, token, entry, chapter_canonical, items, title_found):
-    title_tag = "h3"
-    if token.type == "heading_open" and token.tag == title_tag:
-        entry = {}
+    title_tag = 'h3'
+    if token.type == 'heading_open' and token.tag == title_tag:
+        if not entry['canonicals'] and 'title' in entry:
+            if len(items) < 2 or items[-2]['chapter_canonical'] != chapter_canonical:
+                # Set default canonical for introduction and other chapters without verse context
+                default_canonical = chapter_canonical + 1
+                entry['canonicals'].append(default_canonical)
+                get_logger().info('no verses found for entry with title \"{}\". First entry in this chapter, so assuming intro and setting default canonical: {}'.format(entry['title'], default_canonical))
+            else:
+                next_canonical = items[-2]['canonicals'][-1] + 1
+                entry['canonicals'].append(next_canonical)
+                get_logger().info('no verses found for entry with title \"{}\" and not first entry in this chapter. Getting the next verse as canonical {}'.format(entry['title'], next_canonical))
+        entry = create_entry()
         items.append(entry)
         entry['id'] = len(items)
         entry['chapter_canonical'] = chapter_canonical
-        entry['canonicals'] = []
-        # print("handle_content - heading_open {} found - creating entry {}".format(title_tag, entry['id']))
         title_raw = next(iterator).content
         entry['title'] = title_raw
-        entry['content'] = ""
-        wait_for_token(iterator, "heading_close", title_tag)
+        entry['content'] = ''
+        wait_for_token(iterator, 'heading_close', title_tag)
         title_found = True
     return entry, title_found
 
@@ -128,7 +137,6 @@ def handle_content(iterator, token, entry, title_found):
     if title_found and token.type == "heading_open" and token.tag == section_title:
         if entry['content'] != "":
             entry['content'] += "\n"
-        # print("handle_content - heading_open {} found - current entry {}".format(section_title, entry['id']))
         token = next(iterator)
         if token.type == "inline":
             get_logger().debug("entry {} - content for section title found".format(entry['id']))
@@ -138,19 +146,23 @@ def handle_content(iterator, token, entry, title_found):
             get_logger().info("no section title found in token: {}", token)
         wait_for_token(iterator, "heading_close", section_title)
 
-    citation = "hr"
-    if title_found and token.type == citation and token.tag == citation:
-        wait_for_token(iterator, "paragraph_open", "p")
-        token = next(iterator)
-        if token.type == "inline":
-            get_logger().debug("entry {} - citation found".format(citation, entry['id']))
-            citation_raw = token.content
-            handle_canonicals(entry['id'], entry['chapter_canonical'], entry['canonicals'], citation_raw)
-            entry['content'] += "**{}**\n".format(citation_raw)
-        else:
-            get_logger().info("entry {} - no citation found in token: " + token)
-        wait_for_token(iterator, "paragraph_close", "p")
-        wait_for_token(iterator, citation, citation)
+    citation_tag = "hr"
+    get_logger().debug("handle_content: {}".format(token))
+    citation_marker = '****'
+    if title_found and token.type == citation_tag and token.tag == citation_tag and token.markup == citation_marker:
+        citation_search_start = True
+        citation_raw_parts = []
+        while citation_search_start or not (token.type == citation_tag and token.tag == citation_tag and token.markup == citation_marker):
+            citation_search_start = False
+            token = next(iterator)
+            if token.type == "inline":
+                get_logger().debug("entry {} - citation part found: {}".format(entry['id'], token.content))
+                citation_raw_parts.append(token.content)
+                token = next(iterator)
+        citation_raw = ' '.join(citation_raw_parts)
+        get_logger().debug("entry {} - combined citation parts: {}".format(entry['id'], citation_raw))
+        entry['content'] += "**{}**\n".format(citation_raw)
+        handle_canonicals(entry['id'], entry['chapter_canonical'], entry['canonicals'], citation_raw)
 
     basic_content = "p"
     if title_found and token.type == "paragraph_open" and token.tag == "p":
@@ -182,7 +194,7 @@ def handle_canonicals(entry_id, chapter_canonical, canonicals, citation):
 
 def parse_tokens(tokens, chapter_canonical, items):
     iterator = iter(tokens)
-    entry = {}
+    entry = create_entry()
     token = None
     title_found = False
     while True:
@@ -198,6 +210,10 @@ def parse_tokens(tokens, chapter_canonical, items):
             raise
 
 
+def create_entry():
+    entry = {}
+    entry['canonicals'] = []
+    return entry
 
 
 def convert_docx_files(args):
