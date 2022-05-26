@@ -86,7 +86,6 @@ def combine_markdown_to_json(file_or_dir):
 
     resources['items'] = items
     data['resources'] = resources
-    data['amp'] = False
     formatted_json = json.dumps(data, indent=2, ensure_ascii=False)
     output_folder = "json"
     if not os.path.exists(output_folder):
@@ -211,9 +210,7 @@ def parse_tokens(tokens, chapter_canonical, items):
 
 
 def create_entry():
-    entry = {}
-    entry['canonicals'] = []
-    return entry
+    return {'amp': False, 'canonicals': []}
 
 
 def convert_docx_files(args):
