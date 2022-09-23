@@ -24,36 +24,37 @@ def detect_language(text):
     reliable, index, top_3_choices = pycld2.detect(raw_text, bestEffort=False)
     if not reliable:
         reliable, index, top_3_choices = pycld2.detect(raw_text, bestEffort=True)
-
     return top_3_choices[0][1]
 
 
 """HTML mappings"""
 
-def style_mappings(text, title=None):
+def style_mappings(text, title=None, wordpress=True):
     text_raw = copy(text)
 
-    if True:
-        text = standardize(text)
-        text = regexp_style_mappings(text)
-        text = align_styles(text)
+    text = standardize(text)
+    text = regexp_style_mappings(text)
+    text = align_styles(text)
+    text = add_body(text)
+    if not wordpress:
         text = add_header(text)
-        text = add_copyright(text)
+    text = add_copyright(text)
 
-        text = format_quotation_marks(text)
-        text = format_bible_verses(text, title)
-        text = format_lists(text)
-        text = format_quotes(text)
+    text = format_quotation_marks(text)
+    text = format_bible_verses(text, title)
+    text = format_lists(text)
+    text = format_quotes(text)
 
-        assertion_test(text, text_raw, title)
+    assertion_test(text, text_raw, title)
 
-        lang = detect_language(text_raw)
-        text = format_language(text, lang)
+    lang = 'de' if True else detect_language(text_raw)  # seems to not work with Mac M1 processors
+    text = format_language(text, lang)
 
-        if lang == 'de':
-            bible_check(text, title)
-
-        text = final_cut(text)
+    if lang == 'de':
+        bible_check(text, title)
+    if wordpress:
+        text = format_wordpress(text, title)
+    text = final_cut(text)
     #text = format_ascii(text)  # Do we need this?
 
     # code efficiency: styles ~0.1s, tests ~0.1s, lang ~0.15s, bible ~0.2s
@@ -314,7 +315,7 @@ def format_lists(text):
     pad2 = r'<p style="margin-top:-10; padding-left: {};">&bull;'.format(PADDINGS[2])
 
     # list -> 'a.' to '<ol><li>...</li>', 'i.' to '  <ol class="i"><li>...</li>', bullets to '<li>...</li>'
-    text = re.sub(r'({}a. )'.format(pad0), r'<ol>\n\1', text)
+    text = re.sub(r'({}a. )'.format(pad0), r'<ol class="a">\n\1', text)
     text = re.sub(r'({}i. )'.format(pad1), r'  <ol class="i">\n\1', text)
     text = re.sub(r'({})([a-z])(\. )(.*)(</p>)'.format(pad0), r' <li>\4</li>', text)
     text = re.sub(r'({})([ivx]+)(\. )(.*)(</p>)'.format(pad1), r'   <li>\4</li>', text)
@@ -346,6 +347,14 @@ def format_lists(text):
     return text
 
 
+def add_body(text):
+    text = '<body>\n' + text
+
+    text = re.sub(r'<b style="color:#004161;">', r'<b>', text)
+    text = re.sub(r'<p style="font-weight: bold; color:#004161;">', r'<p class="verse">', text)
+    return text
+
+
 def add_header(text):
     header = '<head>\n <style type="text/css">\n'
     header += '  body {\n' \
@@ -353,7 +362,7 @@ def add_header(text):
               '      margin: 30px; margin-left: 4%; margin-right: 4%;\n' \
               '     }\n'
     header += '  br {display: grid; margin-top: 5px; content: " ";}\n'
-    header += '  ol {display: grid; list-style: lower-latin; gap: 10px; padding-left: 25px;}\n'
+    header += '  ol.a {display: grid; list-style: lower-latin; gap: 10px; padding-left: 25px;}\n'
     header += '  ol.i {list-style: lower-roman; gap: 8px;}\n'
     header += '  ol.bull {list-style: square; gap: 5px;}\n'
     header += '  li {position: relative; padding-left: 2px;}\n'
@@ -361,17 +370,13 @@ def add_header(text):
     header += '  b {color: #004161;}\n'
     header += '  hr {margin: -2px;}\n'
     header += '  small {display: inline-block;}\n'
-    header += ' </style>\n</head>\n<body>\n'
-    text = header + text
-
-    text = re.sub(r'<b style="color:#004161;">', r'<b>', text)
-    text = re.sub(r'<p style="font-weight: bold; color:#004161;">', r'<p class="verse">', text)
-    return text
+    header += ' </style>\n</head>\n'
+    return header + text
 
 
 def add_copyright(text):
     copyright = '\n<p><br /><em>&copy; 2022 The <a href="https://enduringword.com/">Enduring Word</a> '
-    copyright += 'Bible Commentary by David Guzik.</em></p>\n<body>'
+    copyright += 'Bible Commentary by David Guzik.</em></p>\n</body>'
     text = re.sub(r'([\n\r])([\n\r])', r'\1', text + copyright)
     return text
 
@@ -384,9 +389,11 @@ def format_bible_verses(text, title=None):
         if title[-1].isdigit():
             #text = re.sub(h4_verse, r'\1\7<hr>\8&bdquo;\9&ldquo;  <small>({},&thinsp;\3\4\5)</small>\10<hr>'.format(title), text)
             text = re.sub(h4_verse, r'\1\7<hr>\8\9  <small>({},&thinsp;\3\4\5)</small>\10<hr>'.format(title), text)
+            #text = re.sub(h4_verse, r'\1\7<h5>{} \3\4\5</h5>\8<small>{},&thinsp;\3\4\5</small><br />\9  \10'.format(title, title), text)
         else:
             #text = re.sub(h4_verse, r'\1\7<hr>\8&bdquo;\9&ldquo;  <small>({} \3\4\5)</small>\10<hr>'.format(title), text)
             text = re.sub(h4_verse, r'\1\7<hr>\8\9  <small>({} \3\4\5)</small>\10<hr>'.format(title), text)
+            #text = re.sub(h4_verse, r'\1\7<h5>{} \3\4\5</h5>\8<small>{} \3\4\5</small><br />\9  \10'.format(title, title), text)
     text = re.sub('(\d{1,3}),(\d{1,3})', r'\1,&thinsp;\2', text)
 
     # Use << ... >> quotation marks for Schlachter
@@ -485,7 +492,7 @@ def assertion_test(text, text_orig, title):
         print_check(text_samples)
 
     # incorrect quotation marks
-    all_parts = re.findall(r'<hr><p class="verse"> (.*)  <small>', text) + re.findall(r'<li>(.*)</li>', text)
+    all_parts = re.findall(r'<p class="verse"> (.*)  <small>', text) + re.findall(r'<li>(.*)</li>', text)
     text_samples = [t for t in all_parts if t.count("&bdquo;") + t.count("&raquo;") != t.count("&ldquo;") + t.count("&laquo;")]
     if len(text_samples)>0:
         text_samples = [re.sub(r'(<[^>]*>|&\w+;)', r' ', t) for t in text_samples]
@@ -533,8 +540,8 @@ def load_bible(title=None):
 def bible_check(text, title):
 
     bible = load_bible(title).lower()
-    verses = re.findall(r'<hr><p class="verse"> (.*)  <small>', text.lower())
-    verse_nums = re.findall(r'<hr><p class="verse"> .*  <small>\((.*)\)</small>', text.lower())
+    verses = re.findall(r'<p class="verse"> (.*)  <small>', text.lower())
+    verse_nums = re.findall(r'<p class="verse"> .*  <small>\((.*)\)</small>', text.lower())
 
     n = 0
     for vers, vers_num in zip(verses, verse_nums):
@@ -562,6 +569,17 @@ def bible_check(text, title):
         print_check([sample.replace('&raquo;', '').replace('&laquo;', '') for sample in text_samples])
 
     return bible
+
+
+"""Wordpress-specific formatting"""
+
+def format_wordpress(text, title=None):
+    h4_verse = '(<hr><p class="verse">)(.*)(<small>)\((.*)\)(</small>)(</p><hr>[\r\n])'
+    text = re.sub(h4_verse, r'<h5 id="\4">\4</h5>\n\1\3\4\5<br />\2\6', text)
+    text = re.sub('(<h5 id=".*)(\s)(.*)(,&thinsp;)(.*">.*</h5>)', r'\1_\3_\5', text)
+    text = re.sub('(<h5 id=".*)(.&thinsp;)(.*">.*</h5>)', r'\1_\3', text)
+    text = text.replace('<hr>', '')
+    return text
 
 
 """Spell Checker (currently not being used)"""
