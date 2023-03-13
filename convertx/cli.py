@@ -80,7 +80,7 @@ def main():
 
                 elif args.output.endswith('md'):
                     title = args.output.split('/')[-1].strip('.md')
-                    result = style_mappings(result, title)
+                    result = style_mappings(result, title, wordpress=False)
 
                     result = html2text(result)
                     result = style_mappings_md(result)
