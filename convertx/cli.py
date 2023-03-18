@@ -107,7 +107,7 @@ def wait_for_token(iterator, token_type, token_tag):
 
 
 def handle_title(iterator, token, entry, chapter_canonical, items, title_found):
-    title_tag = 'h3'
+    title_tag = 'h4'
     if token.type == 'heading_open' and token.tag == title_tag:
         if not entry['canonicals'] and 'title' in entry:
             if len(items) < 2 or items[-2]['chapter_canonical'] != chapter_canonical:
@@ -132,19 +132,6 @@ def handle_title(iterator, token, entry, chapter_canonical, items, title_found):
 
 
 def handle_content(iterator, token, entry, title_found):
-    section_title = "h4"
-    if title_found and token.type == "heading_open" and token.tag == section_title:
-        if entry['content'] != "":
-            entry['content'] += "\n"
-        token = next(iterator)
-        if token.type == "inline":
-            get_logger().debug("entry {} - content for section title found".format(entry['id']))
-            section_title_raw = token.children[0].content
-            entry['content'] += "### {} \n\n".format(section_title_raw)
-        else:
-            get_logger().info("no section title found in token: {}", token)
-        wait_for_token(iterator, "heading_close", section_title)
-
     citation_tag = "hr"
     get_logger().debug("handle_content: {}".format(token))
     citation_marker = '****'
