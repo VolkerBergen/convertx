@@ -248,14 +248,11 @@ def collect_files(file_or_dir, sub_folder, file_ext):
 def get_files_in_dir(files, base_dir, expected_sub_dir, file_ext):
     for file_or_dir in os.listdir(base_dir):
         full_path = os.path.join(base_dir, file_or_dir)
-        sub_dir = os.path.join(full_path, expected_sub_dir)
         if os.path.isdir(full_path):
-            if os.path.exists(sub_dir):
-                files += [os.path.join(sub_dir, file) for file in os.listdir(sub_dir) if file.endswith(file_ext)]
+            if file_or_dir == expected_sub_dir:
+                files += [os.path.join(full_path, file) for file in os.listdir(full_path) if file.endswith(file_ext)]
             else:
                 get_files_in_dir(files, full_path, expected_sub_dir, file_ext)
-        # elif os.path.isfile(full_path) and full_path.endswith(full_path):
-        #     files.append(full_path)
 
 
 def convert_file(input_file, output_file, dry_run):
