@@ -71,7 +71,7 @@ def combine_markdown_to_json(file_or_dir):
     if os.path.isdir(file_or_dir):
         files += [os.path.join(file_or_dir, file) for file in os.listdir(file_or_dir) if file.endswith(".md")]
     files.sort()
-    file_pattern = re.compile(r'[\w/]*?([0-9]*?)(_\w*_)([0-9]*?).md')
+    file_pattern = re.compile(r'[\w/]*?([0-9]*?)(_.*_)([0-9]*?).md')
     for file in files:
         match = file_pattern.fullmatch(file)
         chapter_canonical = int(match.group(1)) * 1000000 + int(match.group(3)) * 1000
