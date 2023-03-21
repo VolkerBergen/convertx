@@ -201,7 +201,7 @@ def create_entry():
 
 
 def convert_docx_files(args):
-    files = collect_files(args.file_or_folder, args.sub_input_dir_name, ".docx")
+    files = collect_files(args.file_or_folder, args.input_dir, ".docx")
 
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
@@ -291,7 +291,7 @@ def _parse_args():
         help="File and folder to process")
 
     parser.add_argument(
-        "--sub-input-dir-name",
+        "--input-dir",
         default="",
         help="Name of sub directory of input docx files.")
 

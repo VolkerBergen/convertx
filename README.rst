@@ -9,22 +9,24 @@ How to convertX
 ---------------
 
 Installation: ``pip install -U convertx``
+Command: ``convertx [html|doc|json] [file|folder]``
 
-CLI (single file)
+HTML
 
-- ``convertx document.docx output.html``
-- ``convertx document.docx output.md``
+- ``convertx html document.docx`` (single file)
+- ``convertx html . (entire directory)
 
-CLI (full directory)
+Markdown/JSON
 
-- ``cd`` into directory and run ``convertx html``
-- ``cd`` into directory and run ``convertx markdown``
+- ``convertx markdown . --input-dir Deutsch`` (markdown)
+- ``convertx json markdown`` (JSON)
 
 Additional arguments:
 
-- ``--output-dir=output``  (directory for generated HTML)
+- ``--output-dir=html``  (directory for generated output files)
 - ``--input-dir=Deutsch``  (sub-/directories to include)
-
+- ``--dry-run`` (only validate without converting)
+- ``--verbose`` (debug logging)
 
 Project Outline
 ---------------
