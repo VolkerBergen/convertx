@@ -49,7 +49,7 @@ def main():
     args = _parse_args()
     init_logger(args)
 
-    if args.output_dir is None:
+    if args.output_dir is None or args.output_dir == '':
         args.output_dir = args.command
 
     if args.command == "json":
@@ -206,7 +206,7 @@ def convert_docx_files(args):
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
 
-    file_pattern = re.compile(r'([0-9]*?)(_\w*_)([0-9]*?)')
+    file_pattern = re.compile(r'([0-9]*?)(_.*_)([0-9]*?)')
 
     for file in files:
         output_filename = os.path.splitext(os.path.basename(file))[0].replace(' ', '_')
