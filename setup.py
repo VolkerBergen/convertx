@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='convertx',
-    version='0.1',
+    version='0.2',
     description='Convert Word documents (docx) to clean HTML and Markdown',
     long_description=open(os.path.join(os.path.dirname(__file__), 'README.rst')).read(),
     author='Volker Bergen',
@@ -12,7 +12,7 @@ setup(
     packages=find_packages(),
     entry_points={"console_scripts": ["convertx=convertx.cli:main"]},
     keywords="docx word clean html markdown md",
-    install_requires=["mammoth==1.4.18", "cobble>=0.1.3,<0.2", "html2text", "pycld2", "lxml"],
+    install_requires=["mammoth==1.4.18", "cobble>=0.1.3,<0.2", "html2text", "pycld2", "lxml", "markdown-it-py"],
     python_requires='>=2.7',
     license="BSD-2-Clause",
     classifiers=[
