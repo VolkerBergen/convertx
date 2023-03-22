@@ -10,7 +10,7 @@ How to convertX
 
 Installation: ``pip install -U convertx``
 
-Command: ``convertx [html|doc|json] [file|folder]``
+Command: ``convertx [html|markdown|json] [file|folder]``
 
 HTML
 
