@@ -348,7 +348,7 @@ def format_lists(text):
 
 
 def add_body(text):
-    text = '<body>\n' + text
+    text = '<body>\n<div class="bible-comment">\n' + text
 
     text = re.sub(r'<b style="color:#004161;">', r'<b>', text)
     text = re.sub(r'<p style="font-weight: bold; color:#004161;">', r'<p class="verse">', text)
@@ -376,7 +376,7 @@ def add_header(text):
 
 def add_copyright(text):
     copyright = '\n<p><br /><em>&copy; 2022 The <a href="https://enduringword.com/">Enduring Word</a> '
-    copyright += 'Bible Commentary by David Guzik.</em></p>\n</body>'
+    copyright += 'Bible Commentary by David Guzik.</em></p>\n</div>\n</body>'
     text = re.sub(r'([\n\r])([\n\r])', r'\1', text + copyright)
     return text
 
