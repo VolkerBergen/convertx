@@ -74,11 +74,8 @@ def combine_markdown_to_json(file_or_dir):
     file_pattern = re.compile(r'[\w/]*?([0-9]*?)(_.*_)([0-9]*?).md')
     for file in files:
         match = file_pattern.fullmatch(file)
-        chapter_canonical = int(match.group(1)) * 1000000 + int(match.group(3)) * 1000
-        should_process_file = True
-        # should_process_file = "Matthew" in file
-        # should_process_file = "043_John_Deutsch_Johannes_019" in file
-        if should_process_file:
+        if match is not None:  # format "043_John_Deutsch_Johannes_019"
+            chapter_canonical = int(match.group(1)) * 1000000 + int(match.group(3)) * 1000
             get_logger().info("Processing file {}".format(file))
             with open(file, "r") as file_obj:
                 tokens = md.parse(file_obj.read())
@@ -212,9 +209,11 @@ def convert_docx_files(args):
         output_filename = os.path.splitext(os.path.basename(file))[0].replace(' ', '_')
         if args.command == "markdown":
             folder_prefix = os.path.dirname(file).replace("." + os.sep, "").replace(os.sep, '_').replace(" ", "_") + "_"
-            output_filename = folder_prefix + output_filename
-            match = file_pattern.fullmatch(output_filename)
-            output_filename = f'{int(match.group(1)):03}' + match.group(2) + f'{int(match.group(3)):03}' + ".md"
+            output_dir_filename = folder_prefix + output_filename
+            match = file_pattern.fullmatch(output_dir_filename)
+            if (match is not None) and (match.group(1) != ''):  # format "043_John_Deutsch_Johannes_019"
+                output_filename = f'{int(match.group(1)):03}' + match.group(2) + f'{int(match.group(3)):03}'
+            output_filename += ".md"
         elif args.command == "html":
             output_filename += ".html"
 
