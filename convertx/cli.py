@@ -60,10 +60,12 @@ def main():
 
 def combine_markdown_to_json(file_or_dir):
     data = {}
-    resources = {'name': "Resource Reference Schema", 'locale': "en", 'abbreviation': "RRS",
-                 'provider': "commentary", 'cacheable': True, 'publisher': "ERF Medien",
-                 'logo': "https:\/\/www.erf.de\/download\/logo\/L_ERF_Basis.jpg",
-                 'copyright': "\u00a9 ERF Medien", 'api': None, 'public_url': True}
+    resources = {'name': "Enduring Word (Deutsch)", 'locale': "de", 'abbreviation': "EWD",
+                 'provider': "commentary", 'cacheable': True,
+                 'publisher': "Enduring Word & ICF München", 'logo': None,
+                 'copyright': "\u00a9 2023 The Enduring Word Bible Commentary by David Guzik",
+                 'api': None, 'public_url': True, 'amp': False,
+                 }
     items = []
 
     md = MarkdownIt()
@@ -82,7 +84,7 @@ def combine_markdown_to_json(file_or_dir):
                 parse_tokens(tokens, chapter_canonical, items)
 
     resources['items'] = items
-    data['resources'] = resources
+    data['resources'] = [resources]
     formatted_json = json.dumps(data, indent=2, ensure_ascii=False)
     output_folder = "json"
     if not os.path.exists(output_folder):
@@ -194,7 +196,7 @@ def parse_tokens(tokens, chapter_canonical, items):
 
 
 def create_entry():
-    return {'amp': False, 'canonicals': []}
+    return {'canonicals': []}
 
 
 def convert_docx_files(args):
