@@ -14,12 +14,12 @@ Command: ``convertx [html|doc|json] [file|folder]``
 HTML
 
 - ``convertx html document.docx`` (single file)
-- ``convertx html . (entire directory)
+- ``convertx html .`` (entire directory)
 
 Markdown/JSON
 
 - ``convertx markdown . --input-dir Deutsch`` (markdown)
-- ``convertx json markdown`` (JSON)
+- ``convertx json markdown`` (json)
 
 Additional arguments:
 
