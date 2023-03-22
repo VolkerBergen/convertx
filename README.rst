@@ -1,8 +1,8 @@
 ConvertX for the Enduring Word commentary
 =========================================
 
-Converting Word documents to HTML/JSON, in order to publish our german translation of the Enduring
-Word commentary at
+Converting Word documents to HTML/JSON to publish our german translation of the Enduring Word
+commentary at
 `enduringword.de <https://de.enduringword.com/>`_ and `bibleserver.com <https://bibleserver.com/>`_.
 
 How to convertX
