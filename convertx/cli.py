@@ -78,11 +78,11 @@ def combine_markdown_to_json(file_or_dir):
         match = file_pattern.fullmatch(file)
         if match is not None:  # format "043_John_Deutsch_Johannes_019"
             chapter_canonical = int(match.group(1)) * 1000000 + int(match.group(3)) * 1000
-            get_logger().info("Processing file {}".format(file))
+            get_logger().debug("Processing file {}".format(file))
             with open(file, "r") as file_obj:
                 tokens = md.parse(file_obj.read())
                 parse_tokens(tokens, chapter_canonical, items)
-    items = [i for i in items if i["canonicals"]]
+    items = [i for i in items if i["canonicals"] and i["content"].startswith('**')]
     resources['items'] = items
     data['resources'] = [resources]
     formatted_json = json.dumps(data, indent=2, ensure_ascii=False)
