@@ -29,7 +29,7 @@ def detect_language(text):
 
 """HTML mappings"""
 
-def style_mappings(text, title=None, wordpress=True):
+def style_mappings(text, title=None, wordpress=True, copyright=True):
     text_raw = copy(text)
 
     text = standardize(text)
@@ -38,7 +38,9 @@ def style_mappings(text, title=None, wordpress=True):
     text = add_body(text)
     if not wordpress:
         text = add_header(text)
-    text = add_copyright(text)
+    if copyright:
+        text = add_copyright(text)
+    text = add_closing(text)
 
     text = format_quotation_marks(text)
     text = format_bible_verses(text, title)
@@ -375,9 +377,12 @@ def add_header(text):
 
 
 def add_copyright(text):
-    copyright = '\n<p><br /><em>&copy; 2022 The <a href="https://enduringword.com/">Enduring Word</a> '
-    copyright += 'Bible Commentary by David Guzik.</em></p>\n</div>\n</body>'
-    text = re.sub(r'([\n\r])([\n\r])', r'\1', text + copyright)
+    copyright = '\n<p><br /><em>&copy; 2023 The <a href="https://enduringword.com/">Enduring ' \
+                'Word</a> Bible Commentary by David Guzik.</em></p>'
+    return text + copyright
+
+def add_closing(text):
+    text = re.sub(r'([\n\r])([\n\r])', r'\1', text + '\n</div>\n</body>')
     return text
 
 

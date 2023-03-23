@@ -263,7 +263,7 @@ def convert_file(input_file, output_file, dry_run):
         if output_file.endswith('html'):
             result = style_mappings(result, title)
         elif output_file.endswith('md'):
-            result = style_mappings(result, title, wordpress=False)
+            result = style_mappings(result, title, wordpress=False, copyright=False)
             result = html2text(result, bodywidth=0)
             result = style_mappings_md(result)
 
