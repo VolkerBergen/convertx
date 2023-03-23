@@ -123,7 +123,8 @@ def handle_title(iterator, token, entry, chapter_canonical, items, title_found):
         entry['id'] = len(items)
         entry['chapter_canonical'] = chapter_canonical
         title_raw = next(iterator).content
-        entry['title'] = re.sub(r'([0-9]*?)(\\\. )(.*)',r'\3', title_raw)  # remove numbered list
+        title = re.sub(r'([0-9]*?)(\\\. )(.*)',r'\3', title_raw).replace('_', '')  # remove numbers
+        entry['title'] = title
         entry['content'] = ''
         wait_for_token(iterator, 'heading_close', title_tag)
         title_found = True
