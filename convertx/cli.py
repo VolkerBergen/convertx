@@ -109,22 +109,23 @@ def handle_title(iterator, token, entry, chapter_canonical, items, title_found):
     title_tag = 'h4'
     if token.type == 'heading_open' and token.tag == title_tag:
         if not entry['canonicals'] and 'title' in entry:
-            return entry, False
-            if len(items) < 2 or items[-2]['chapter_canonical'] != chapter_canonical:
-                # Set default canonical for introduction and other chapters without verse context
-                default_canonical = chapter_canonical + 1
-                entry['canonicals'].append(default_canonical)
-                get_logger().info('no verses found for entry with title \"{}\". First entry in this chapter, so assuming intro and setting default canonical: {}'.format(entry['title'], default_canonical))
-            else:
-                next_canonical = items[-2]['canonicals'][-1] + 1
-                entry['canonicals'].append(next_canonical)
-                get_logger().info('no verses found for entry with title \"{}\" and not first entry in this chapter. Getting the next verse as canonical {}'.format(entry['title'], next_canonical))
+            if False:
+                if len(items) < 2 or items[-2]['chapter_canonical'] != chapter_canonical:
+                    # Set default canonical for introduction and other chapters without verse context
+                    default_canonical = chapter_canonical + 1
+                    entry['canonicals'].append(default_canonical)
+                    get_logger().info('no verses found for entry with title \"{}\". First entry in this chapter, so assuming intro and setting default canonical: {}'.format(entry['title'], default_canonical))
+                else:
+                    next_canonical = items[-2]['canonicals'][-1] + 1
+                    entry['canonicals'].append(next_canonical)
+                    get_logger().info('no verses found for entry with title \"{}\" and not first entry in this chapter. Getting the next verse as canonical {}'.format(entry['title'], next_canonical))
         entry = create_entry()
         items.append(entry)
         entry['id'] = len(items)
         entry['chapter_canonical'] = chapter_canonical
         title_raw = next(iterator).content
-        title = re.sub(r'([0-9]*?)(\\\. )(.*)',r'\3', title_raw).replace('_', '')  # remove numbers
+        title = re.sub(r'([0-9]*?)(\\\. )(.*)',r'\3', title_raw)  # remove numbers
+        title = title.replace('_', '').replace('*', '')  # remove italic and bold
         entry['title'] = title
         entry['content'] = ''
         wait_for_token(iterator, 'heading_close', title_tag)
