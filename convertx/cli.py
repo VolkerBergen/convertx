@@ -82,7 +82,7 @@ def combine_markdown_to_json(file_or_dir):
             with open(file, "r") as file_obj:
                 tokens = md.parse(file_obj.read())
                 parse_tokens(tokens, chapter_canonical, items)
-
+    items = [i for i in items if i["canonicals"]]
     resources['items'] = items
     data['resources'] = [resources]
     formatted_json = json.dumps(data, indent=2, ensure_ascii=False)
@@ -109,6 +109,7 @@ def handle_title(iterator, token, entry, chapter_canonical, items, title_found):
     title_tag = 'h4'
     if token.type == 'heading_open' and token.tag == title_tag:
         if not entry['canonicals'] and 'title' in entry:
+            return entry, False
             if len(items) < 2 or items[-2]['chapter_canonical'] != chapter_canonical:
                 # Set default canonical for introduction and other chapters without verse context
                 default_canonical = chapter_canonical + 1
