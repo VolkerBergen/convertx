@@ -53,12 +53,12 @@ def main():
         args.output_dir = args.command
 
     if args.command == "json":
-        combine_markdown_to_json(args.file_or_folder)
+        combine_markdown_to_json(args)
     else:
         convert_docx_files(args)
 
 
-def combine_markdown_to_json(file_or_dir):
+def combine_markdown_to_json(args):
     data = {}
     resources = {'name': "Enduring Word (Deutsch)", 'locale': "de", 'abbreviation': "EWD",
                  'provider': "commentary", 'cacheable': True,
@@ -70,6 +70,7 @@ def combine_markdown_to_json(file_or_dir):
 
     md = MarkdownIt()
     files = []
+    file_or_dir = args.file_or_folder
     if os.path.isdir(file_or_dir):
         files += [os.path.join(file_or_dir, file) for file in os.listdir(file_or_dir) if file.endswith(".md")]
     files.sort()
@@ -84,7 +85,7 @@ def combine_markdown_to_json(file_or_dir):
                 parse_tokens(tokens, chapter_canonical, items)
     items = [i for i in items if i["canonicals"] and i["content"].startswith('**')]
 
-    if True:  # TODO
+    if True:
         seen = set()
         dupes = [x for x in [f'{i["canonicals"]}' for i in items] if x in seen or seen.add(x)]
         get_logger().info(f'{len(dupes)} duplicates: {dupes}')
@@ -92,7 +93,7 @@ def combine_markdown_to_json(file_or_dir):
     resources['items'] = items
     data['resources'] = [resources]
     formatted_json = json.dumps(data, indent=2, ensure_ascii=False)
-    output_folder = "json"
+    output_folder = args.output_dir
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     output_filename = os.path.join(output_folder, "output.json")
@@ -111,65 +112,62 @@ def wait_for_token(iterator, token_type, token_tag):
             break
 
 
-def handle_title(iterator, token, entry, chapter_canonical, items, title_found):
+def handle_title(iterator, token, chapter_canonical, items):
     title_tag = 'h4'
+    entry = None
     if token.type == 'heading_open' and token.tag == title_tag:
-        if not entry['canonicals'] and 'title' in entry:
-            if False:
-                if len(items) < 2 or items[-2]['chapter_canonical'] != chapter_canonical:
-                    # Set default canonical for introduction and other chapters without verse context
-                    default_canonical = chapter_canonical + 1
-                    entry['canonicals'].append(default_canonical)
-                    get_logger().info('no verses found for entry with title \"{}\". First entry in this chapter, so assuming intro and setting default canonical: {}'.format(entry['title'], default_canonical))
-                else:
-                    next_canonical = items[-2]['canonicals'][-1] + 1
-                    entry['canonicals'].append(next_canonical)
-                    get_logger().info('no verses found for entry with title \"{}\" and not first entry in this chapter. Getting the next verse as canonical {}'.format(entry['title'], next_canonical))
         entry = create_entry()
         items.append(entry)
         entry['id'] = len(items)
         entry['chapter_canonical'] = chapter_canonical
         title_raw = next(iterator).content
-        title = re.sub(r'([0-9]*?)(\\\. )(.*)',r'\3', title_raw)  # remove numbers
+        title = re.sub(r'([0-9]*?)(\\\. )(.*)', r'\3', title_raw)  # remove numbers
         title = title.replace('_', '').replace('*', '')  # remove italic and bold
         entry['title'] = title
         entry['content'] = ''
         wait_for_token(iterator, 'heading_close', title_tag)
-        title_found = True
-    return entry, title_found
+    return entry
 
 
-def handle_content(iterator, token, entry, title_found):
+def handle_content(iterator, token, items, current_item, last_item):
     citation_tag = "hr"
     get_logger().debug("handle_content: {}".format(token))
     citation_marker = '****'
-    if title_found and token.type == citation_tag and token.tag == citation_tag and token.markup == citation_marker:
+    if current_item and token.type == citation_tag and token.tag == citation_tag and token.markup == citation_marker:
         citation_search_start = True
         citation_raw_parts = []
-        while citation_search_start or not (token.type == citation_tag and token.tag == citation_tag and token.markup == citation_marker):
+        while citation_search_start or not (
+                token.type == citation_tag and token.tag == citation_tag and token.markup == citation_marker):
             citation_search_start = False
             token = next(iterator)
             if token.type == "inline":
-                get_logger().debug("entry {} - citation part found: {}".format(entry['id'], token.content))
+                get_logger().debug("entry {} - citation part found: {}".format(current_item['id'], token.content))
                 citation_raw_parts.append(token.content)
                 token = next(iterator)
         citation_raw = ' '.join(citation_raw_parts)
-        get_logger().debug("entry {} - combined citation parts: {}".format(entry['id'], citation_raw))
-        entry['content'] += "**{}**\n".format(citation_raw)
-        handle_canonicals(entry['id'], entry['chapter_canonical'], entry['canonicals'], citation_raw)
+        get_logger().debug("entry {} - combined citation parts: {}".format(current_item['id'], citation_raw))
+        current_item['content'] += "**{}**\n".format(citation_raw)
+        handle_canonicals(current_item['id'], current_item['chapter_canonical'], current_item['canonicals'],
+                          citation_raw)
+        if contains_all_canonicals(last_item, current_item):
+            get_logger().info("merge current entry {} into last entry {}".format(current_item['id'], last_item['id']))
+            last_item['content'] += "\n" + current_item['content']
+            items.remove(current_item)
+            current_item = last_item
+            last_item = None
 
     basic_content = "p"
-    if title_found and token.type == "paragraph_open" and token.tag == "p":
+    if current_item and token.type == "paragraph_open" and token.tag == "p":
         token = next(iterator)
         if token.type == "inline":
-            get_logger().debug("entry {} - content found at level {}".format(entry['id'], token.level))
+            get_logger().debug("entry {} - content found at level {}".format(current_item['id'], token.level))
             basic_content_raw = token.content
             indent = " ".join([""] * token.level)
-            entry['content'] += "{}* {}\n".format(indent, basic_content_raw)
+            current_item['content'] += "{}* {}\n".format(indent, basic_content_raw)
         else:
-            print("handle_content - basic content paragraph not found in token: " + token)
+            get_logger().debug("handle_content - basic content paragraph not found in token: " + token)
         wait_for_token(iterator, "paragraph_close", basic_content)
-    return entry
+    return current_item, last_item
 
 
 def handle_canonicals(entry_id, chapter_canonical, canonicals, citation):
@@ -179,23 +177,35 @@ def handle_canonicals(entry_id, chapter_canonical, canonicals, citation):
         if verse_match.group(2) == "" and (chapter_canonical + int(verse_match.group(1))) not in canonicals:
             canonicals.append(chapter_canonical + int(verse_match.group(1)))
         elif verse_match.group(2) != "":
-            for verse in range(int(verse_match.group(1)), int(verse_match.group(2))+1):
+            for verse in range(int(verse_match.group(1)), int(verse_match.group(2)) + 1):
                 if (chapter_canonical + verse) not in canonicals:
                     canonicals.append(chapter_canonical + verse)
     else:
         get_logger().warning("entry {} - verses could not be parsed for citation {}".format(entry_id, citation))
 
 
+def contains_all_canonicals(last_item, current_item):
+    if last_item:
+        current_canonicals = set(current_item['canonicals'])
+        last_canonicals = set(last_item['canonicals'])
+        return len(last_canonicals.intersection(current_canonicals)) == len(current_canonicals)
+    return False
+
+
 def parse_tokens(tokens, chapter_canonical, items):
     iterator = iter(tokens)
-    entry = create_entry()
     token = None
-    title_found = False
+    current_item = None
+    last_item = None
     while True:
         try:
             token = next(iterator)
-            entry, title_found = handle_title(iterator, token, entry, chapter_canonical, items, title_found)
-            entry = handle_content(iterator, token, entry, title_found)
+            entry = handle_title(iterator, token, chapter_canonical, items)
+            if entry:
+                get_logger().debug("New entry {} created:".format(entry['id']))
+                last_item = current_item
+                current_item = entry
+            current_item, last_item = handle_content(iterator, token, items, current_item, last_item)
         except StopIteration:
             break
         except Exception as e:
@@ -327,4 +337,3 @@ def _parse_args():
 
 if __name__ == "__main__":
     main()
-
