@@ -63,7 +63,8 @@ def combine_markdown_to_json(args):
     resources = {'name': "Enduring Word (Deutsch)", 'locale': "de", 'abbreviation': "EWD",
                  'provider': "commentary", 'cacheable': True,
                  'publisher': "Enduring Word & ICF München", 'logo': None,
-                 'copyright': "\u00a9 2023 The Enduring Word Bible Commentary by David Guzik",
+                 'copyright': "\u00a9 2023 The Enduring Word Bible Commentary by David Guzik\n"
+                              "(basierend auf der Schlachter 2000 Übersetzung) ",
                  'api': None, 'public_url': True, 'amp': False,
                  }
     items = []

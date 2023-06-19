@@ -490,7 +490,7 @@ def assertion_test(text, text_orig, title):
     ## The following two (list items, quotation marks) are the most common format errors
 
     # unbalanced list opening/closing items
-    if (text_orig.count('<ol>') > 0) or (text.count('<ol') != text.count('</ol')):
+    if (text_orig.count('<ol>') > 0) or (text_orig.count('</ol>') > 0):
         text_samples = [t for t in re.findall(r'<ol>(.*)</ol>', text_orig)]
         text_samples = [re.sub(r'  ', r' ', re.sub(r'(<[^>]*>|&\w+;)', r'', t)) for t in text_samples]
         print_msg(title, 'unidentified list items')
@@ -518,7 +518,8 @@ def style_mappings_md(text):
     text = re.sub(r'([\r\n])      \d{1,3}\.', r'\1   *', text)
     text = re.sub(r'([\r\n])([\r\n])', r'\1', text)
 
-    text = re.sub(r'(\* \* \*[\r\n]„)(.*)(")', r'\1**\2** \3', text)
+    text = re.sub(r'(\* \* \*[\r\n]„)(.*)(")', r'\1**\2**\3', text)
+    text = re.sub(r'(\*\*) (\:)', r'\1\2', text)
     return text
 
 
