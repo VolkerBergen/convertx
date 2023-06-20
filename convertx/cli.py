@@ -164,7 +164,8 @@ def handle_content(iterator, token, items, current_item, last_item):
             get_logger().debug("entry {} - content found at level {}".format(current_item['id'], token.level))
             basic_content_raw = token.content
             indent = " ".join([""] * token.level)
-            current_item['content'] += "{}* {}\n".format(indent, basic_content_raw)
+            # [2:] means changing level 2 to 1, i.e., remove '* ' or change '  * " to '* '
+            current_item['content'] += "{}* {}\n".format(indent, basic_content_raw)[2:]
         else:
             get_logger().debug("handle_content - basic content paragraph not found in token: " + token)
         wait_for_token(iterator, "paragraph_close", basic_content)
@@ -284,6 +285,8 @@ def convert_file(input_file, output_file, dry_run):
             result = style_mappings(result, title)
         elif output_file.endswith('md'):
             result = style_mappings(result, title, wordpress=False, copyright=False)
+            result = result.replace('&thinsp;', '')
+
             result = html2text(result, bodywidth=0)
             result = style_mappings_md(result)
 
