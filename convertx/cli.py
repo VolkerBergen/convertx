@@ -91,6 +91,9 @@ def combine_markdown_to_json(args):
         dupes = [x for x in [f'{i["canonicals"]}' for i in items] if x in seen or seen.add(x)]
         get_logger().info(f'{len(dupes)} duplicates: {dupes}')
 
+    for i in items:
+        i['content'] = i['content'].replace('\n**', '  \n\n**')  # add line breaks
+
     resources['items'] = items
     data['resources'] = [resources]
     formatted_json = json.dumps(data, indent=2, ensure_ascii=False)
