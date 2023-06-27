@@ -530,8 +530,14 @@ def style_mappings_md(text):
     text = re.sub(r'(\() (\*\*)([^*]*)(\*\*) (\))', r'\1\2\3\4\5', text)
     text = re.sub(r'(\() (\_)([^_]*)(\_) (\))', r'\1\2\3\4\5', text)
 
-    text = re.sub(r'(\*\*)([^*]*)(\*\*) (\, )', r'\1\2\3\4', text)
-    text = re.sub(r'(\_)([^_]*)(\_) (\, )', r'\1\2\3\4', text)
+    text = re.sub(r'(\*\*)([^*]*)(\*\*) (\)[.,!?:\n\s])', r'\1\2\3\4', text)
+    text = re.sub(r'(\_)([^_]*)(\_) (\)[.,!?:\n\s])', r'\1\2\3\4', text)
+
+    text = re.sub(r'( \() ', r'\1', text)
+    text = re.sub(r' (\) )', r'\1', text)
+    text = re.sub(r' ([.,!?:] )', r'\1', text)
+
+    text = re.sub(r'([^*])(\*)(\_)', r'\1\2 \3', text)
     return text
 
 
